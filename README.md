@@ -269,3 +269,61 @@ It is about phone directory which we can add and delete the subscriber.we can ad
 																		
 																		
 ![image](https://github.com/keerthipasupuleti/phone-directory/assets/36074761/b6ecf89d-419d-41cf-b1cb-3228132fbc6a)
+
+---
+----------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: tcoth-frontend
+ namespace: default
+spec:
+ selector:
+   matchLabels:
+     app: tcoth-frontend
+ replicas: 1
+ template:
+   metadata:
+     labels:
+       app: tcoth-frontend
+   spec:
+     containers:
+       - name: tcoth-frontend
+         image: tcr.ap.toyota-asia.com/toyota-thailand-website/tcoth-frontend:$SERVICE_VERSION-dev
+         imagePullPolicy: Always
+         resource:
+         envFrom:
+           - configMapRef:
+               name: frontend-env-config
+           - secretRef:
+               name: tcoth-dev-secret
+     imagePullSecrets:
+       - name: harbor-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+ name: tcoth-frontend-service
+ namespace: default
+spec:
+ type: NodePort
+ selector:
+   app: tcoth-frontend
+ ports:
+   - name: http
+     protocol: TCP
+     port: 8030
+     targetPort: 80
+     nodePort: 30001
+---
+apiVersion: v1
+kind: Secret
+metadata:
+ name: harbor-config
+ namespace: default
+data:
+ .dockerconfigjson: eyJhdXRocyI6eyJ0Y3IuYXAudG95b3RhLWFzaWEuY29tL21vZGVybi1hcHAtc3RkIjp7InVzZXJuYW1lIjoicm9ib3QkbW9kZXJuLWFwcC1zdGQiLCJwYXNzd29yZCI6IjZyeHozVndSeWxFMW5tSlFMQ2Jia29FaDJMZU9pOHJCIiwiYXV0aCI6ImNtOWliM1FrYlc5a1pYSnVMV0Z3Y0MxemRHUTZObko0ZWpOV2QxSjViRVV4Ym0xS1VVeERZbUpyYjBWb01reGxUMms0Y2tJS0Nnbz0ifX19
+type: kubernetes.io/dockerconfigjson
+ 
+---------------------------------------------------------------------------------------
+in .dockerconfigjson you can use base64 to encode Base64 string encoder/decoder - IT Tools (it-tools.tech)
