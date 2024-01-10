@@ -327,3 +327,25 @@ type: kubernetes.io/dockerconfigjson
  
 ---------------------------------------------------------------------------------------
 in .dockerconfigjson you can use base64 to encode Base64 string encoder/decoder - IT Tools (it-tools.tech)
+--------------------
+4.	Customer code field type needs to be changed from text to smart dropdown and the data come from Customer Master Maintenance form.
+5.	Once user enters Customer Code other fields related to customer (Customer Name (Eng) , Customer Name (Thai),Adress, District, Sub-District, Province ) should be auto populated. As per current functionality user can enter Zip code manually. However, in future there can be a new screen once user clicks on Zip code field to select zip code based on district. 
+6.	Without Vat should be read only field in new system. We can use it as a flag. This data come from Customer Master Maintenance form. If user would have selected check box for Without VAT, then it denotes that specific customer does not require VAT.
+7.	Emp code will be manually entered by the user. Emp Code should be enabled based on select Specific Customer Code 
+8.	Dealer field will be removed in the new system.
+9.	For some Customer Code Business Place and Tax Id fields should be manually entered and for some Customer Code it will be automatically Populated. If the entered Tax Id/ Business Place is wrong, then system should display error message.
+10.	Zip code should be a mandatory field in Customer details section.
+11.	When user selects Payment Term from drop down, then Payment due days field will be auto populated and cannot be changed.
+12.Other fields from Payment Term Details section (Asset No, Purchase Reqn No, Cost     Center Charge, SAP Budget No., Term (Years), WBS ) come from SAP and  user can enter the data  manually. Currently we do not have any field validation to check whether the user have entered the correct data or not. Business will check whether any API call is required for validation or not.
+1.	Add Booking no. and customer name column in the Vehicle details table along with the existing columns.
+2.	There will be a link on Vehicle details section to redirect to Matched Data Screen and the vehicle related data should come from there.
+3.	If there are more than 20 records in Vehicle details table, then we need to maintain the pagination and each page we can have 10/20 records. 
+4.	Add search criteria section with Booking No and Company Name field along with search button. Also add multiselect dropdown for other columns. Sorting functionality should be there in table list as well. 
+5.	Check boxes need to be there in the table list to select specific vehicles. Once user select checkbox, the select records can be on the top of the list. 
+6.	Vehicle list button should be removed in the new system.
+7.	Leasing Customer Details can be enabled once user selects the checkbox.
+8.	Print Invoice button not required and can be removed. 
+9.	Need a Preview button in place of Print Invoice. Once user clicks on it then only Issue invoice will be enabled
+10.	Once user enter Vehicle details in table then W/S Selling Price field will get populated, and user can also edit it.
+11.	Get Price details come from Price Master Maintenance form.
+12.	Details related to Issue Invoice should be sed to SAP system.
