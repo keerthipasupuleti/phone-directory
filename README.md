@@ -349,3 +349,16 @@ in .dockerconfigjson you can use base64 to encode Base64 string encoder/decoder 
 10.	Once user enter Vehicle details in table then W/S Selling Price field will get populated, and user can also edit it.
 11.	Get Price details come from Price Master Maintenance form.
 12.	Details related to Issue Invoice should be sed to SAP system.
+--------------------
+3.	Series Man Invoice Issuing for Incomplete/Hold Car screen can be accessed by Admin and TMT/SN
+4.	Select radio button for Issues from Inquiry section. Remove Inquiry radio button. 
+5.	Based on the selection of different customer code in Inquiry section on Series Man Invoice Issuing for Incomplete/Hold Car screen the Customer Name should be changed in Customer details section
+6.	Delete type from Vehicle list and Print Invoice from the screen.
+7.	Add Preview button in place of Print Invoice button.
+8.	We can have Series Man Invoice Issuing for Incomplete/Hold Car and Direct Sales Invoice Issuing in a single screen having two different tabs. As user roles are different for these two screens, so there should be restriction for both the users. Users can access the screen based on their roles.
+9.	Issue Credit Note screen can be accessed by Admin and TMT/Sales Planner 
+10.	Enter Invoice No. in Invoice No. text field under Inquiry section and click on execute button other fields should get auto populated and click on Issue Credit Note button to generate a Credit Note.
+11.	When user finds that he did some mistakes in Credit Note and he wants to cancel it then he needs to follow the below steps:
+a)	Enter Credit Note No. in the Credit Note No. text field and select Price radio button. 
+b)	Select reason of Cancellation from Cancel Reason drop down field.
+c)	Click on Cancel Credit Note button. Credit Note should get cancelled.  
