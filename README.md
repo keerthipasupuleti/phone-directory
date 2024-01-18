@@ -361,3 +361,55 @@ The 'Print Preview button will allow the user to preview all the details. Once u
 The user can click on ’Issue Invoice' button to issue the invoice.
 
 Details related to Issue Invoice should be send to SAP system.
+--
+**Scenario 15: Series Man Invoicing Issuing for Incomplete/Hold Car Screen:**
+
+15.1 **Accessing Screen:**
+   - *Scenario:* Admin logs in and navigates to Invoicing and Registration -> Series Man Invoicing Issuing for Incomplete/Hold Car.
+   - *Test Case:* Confirm that the Admin can successfully access the Series Man Invoicing Issuing for Incomplete/Hold Car screen.
+
+15.2 **TMT/SN Access:**
+   - *Scenario:* TMT/SN user logs in and navigates to Invoicing and Registration -> Series Man Invoicing Issuing for Incomplete/Hold Car.
+   - *Test Case:* Ensure that the TMT/SN user can successfully access the Series Man Invoicing Issuing for Incomplete/Hold Car screen.
+
+**Scenario 16: Radio Button Removal and Invoice Issuing:**
+
+16.1 **Radio Button Removal:**
+   - *Scenario:* User navigates to the Inquiry section.
+   - *Test Case:* Confirm that the "Inquiry" radio button is removed from the screen.
+
+16.2 **Selecting Invoice Issue Radio Button:**
+   - *Scenario:* User selects the "Issue" radio button for issuing invoices for incomplete/hold cars.
+   - *Test Case:* Verify that the user can select the "Issue" radio button.
+
+**Scenario 17: Auto-population based on Dealer Code:**
+
+17.1 **Selecting Dealer Code:**
+   - *Scenario:* User selects a Dealer Code.
+   - *Test Case:* Confirm that based on the selected Dealer Code, the 'Sales type' and 'Series' fields in the Vehicle section auto-populate.
+
+**Scenario 18: Enhancing Vehicle Details Table:**
+
+18.1 **Adding Columns:**
+   - *Scenario:* User navigates to the Vehicle details table.
+   - *Test Case:* Ensure that Booking No., Customer Name, Series, and Model/Suffix columns are added along with the existing ones.
+
+18.2 **Redirecting to Matched Data Screen:**
+   - *Scenario:* User clicks on the link in the Vehicle details section.
+   - *Test Case:* Confirm that the system redirects to the Matched Data Screen, and the vehicle-related data is fetched from there.
+
+18.3 **Removing Vehicle List Button:**
+   - *Scenario:* User navigates through the screen.
+   - *Test Case:* Ensure that the Vehicle List button is removed in the new system.
+
+**Scenario 19: Vin No., Engine Prefix, Engine No., and Color Fields:**
+
+19.1 **Search Criteria Columns:**
+   - *Scenario:* User utilizes search criteria columns (Vin No., Engine Prefix, Engine No., Exterior Color, Color Type, Status, Y or Blank).
+   - *Test Case:* Confirm the presence and functionality of the search criteria columns in the table list.
+
+19.2 **Auto-population based on Search:**
+   - *Scenario:* User enters a search, and the information related to model, series, and dealer code auto-populates in the respective columns.
+   - *Test Case:* Verify that the system correctly auto-populates the information based on the search.
+
+These test scenarios and test cases cover the specified functionalities related to accessing the screen, radio button removal, invoice issuing, auto-population based on the dealer code, enhancing the Vehicle details table, redirecting to the Matched Data Screen, and search criteria columns. Please share more details or specific scenarios if needed.
