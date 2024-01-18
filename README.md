@@ -413,3 +413,81 @@ Details related to Issue Invoice should be send to SAP system.
    - *Test Case:* Verify that the system correctly auto-populates the information based on the search.
 
 These test scenarios and test cases cover the specified functionalities related to accessing the screen, radio button removal, invoice issuing, auto-population based on the dealer code, enhancing the Vehicle details table, redirecting to the Matched Data Screen, and search criteria columns. Please share more details or specific scenarios if needed.
+---
+**Scenario 20: Combined Screen for Series Man and Direct Sales Invoice:**
+
+20.1 **Accessing Combined Screen:**
+   - *Scenario:* Admin logs in and navigates to the combined screen for Series Man and Direct Sales Invoice.
+   - *Test Case:* Confirm that the Admin can successfully access the combined screen.
+
+20.2 **TMT/SN Access to Combined Screen:**
+   - *Scenario:* TMT/SN user logs in and navigates to the combined screen for Series Man and Direct Sales Invoice.
+   - *Test Case:* Ensure that the TMT/SN user can successfully access the combined screen.
+
+**Scenario 21: Role-Based Restrictions:**
+
+21.1 **Admin Role Access:**
+   - *Scenario:* Admin navigates through the screen.
+   - *Test Case:* Confirm that the Admin has access to both the Series Man and Direct Sales Invoice tabs.
+
+21.2 **TMT/SN Role Access:**
+   - *Scenario:* TMT/SN user navigates through the screen.
+   - *Test Case:* Ensure that the TMT/SN user has access to their respective tab based on roles.
+
+**Scenario 22: Auto-population and Editability in Price Details:**
+
+22.1 **Get Price Button Functionality:**
+   - *Scenario:* User clicks the 'Get Price' button in the 'Price Details (without Vat)' section.
+   - *Test Case:* Confirm that the W/S Selling Price (Unit) field auto-populates, and the user can edit it.
+
+22.2 **Free Text Fields Functionality:**
+   - *Scenario:* User enters information in 'W/S Air Price (Unit)', 'Trade Discount', and 'Remarks' fields.
+   - *Test Case:* Verify that these fields accept free text.
+
+**Scenario 23: Invoice Amount Generation:**
+
+23.1 **Auto-generation of Invoice Amount:**
+   - *Scenario:* User navigates through the screen.
+   - *Test Case:* Confirm that the 'Invoice Amount' section autogenerates from the system.
+
+**Scenario 24: Customer Details Section:**
+
+24.1 **Changing Customer Name based on Dealer Code:**
+   - *Scenario:* User selects a dealer code in the 'Customer Details' section.
+   - *Test Case:* Verify that the customer name changes based on the selected dealer code.
+
+24.2 **Auto-population of Tax ID and Business Place:**
+   - *Scenario:* User enters a dealer code.
+   - *Test Case:* Confirm that the 'Tax ID' and 'Business Place' fields auto-populate and are non-editable.
+
+**Scenario 25: Payment Term Details Section:**
+
+25.1 **Populating Payment Term from Maintenance Screen:**
+   - *Scenario:* User selects 'Y' in customer type.
+   - *Test Case:* Verify that the 'Payment Term' field and 'Payment Due Date' auto-populate from the 'Payment Master Maintenance' screen.
+
+25.2 **Entering Cost Centre:**
+   - *Scenario:* User enters information in the 'Cost Centre' field.
+   - *Test Case:* Confirm that the 'Cost Centre' field accepts text.
+
+**Scenario 26: Print Preview and Issue Invoice:**
+
+26.1 **Adding Print Preview Button:**
+   - *Scenario:* User navigates through the screen.
+   - *Test Case:* Ensure that the 'Print Preview' button is added, and the 'Print Invoice' button is removed.
+
+26.2 **Previewing Details:**
+   - *Scenario:* User clicks on the 'Print Preview' button.
+   - *Test Case:* Confirm that the user can preview all details.
+
+26.3 **Enabling Issue Invoice after Preview:**
+   - *Scenario:* User clicks on the 'Print Preview' button.
+   - *Test Case:* Verify that the 'Issue Invoice' button is enabled only after clicking 'Print Preview'.
+
+**Scenario 27: Issuing Invoice:**
+
+27.1 **Clicking Issue Invoice Button:**
+   - *Scenario:* User clicks on the 'Issue Invoice' button.
+   - *Test Case:* Confirm that the user can successfully issue the invoice.
+
+These test scenarios and test cases cover the specified functionalities related to the combined screen for Series Man and Direct Sales Invoice, role-based restrictions, auto-population, editability in the Price Details section, invoice amount generation, customer details section, payment term details section, and the addition of the Print Preview button. Please share more details or specific scenarios if needed.
