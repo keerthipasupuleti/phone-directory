@@ -513,3 +513,123 @@ Great! Let's create test case scenarios and test cases based on the provided det
 **Scenario: Fetching Price Details from Price Master Maintenance:**
 
 27. **Clicking on
+
+28. ---
+
+Certainly! Let's break down each step and create specific test case scenarios and test cases for better clarity.
+
+**Step 1: Accessing Direct Sales Invoice Issuing Screen:**
+   
+   - *Scenario:* Admin logs in and navigates to Invoicing and Registration -> Invoicing -> Direct Sales Invoice Issuing.
+   - *Test Case:* Confirm that the admin can successfully access the Direct Sales Invoice Issuing screen.
+
+   - *Scenario:* TMT/SN user logs in and navigates to Invoicing and Registration -> Invoicing -> Direct Sales Invoice Issuing.
+   - *Test Case:* Ensure that the TMT/SN user can successfully access the Direct Sales Invoice Issuing screen.
+
+**Step 2: Salesman Code Functionality:**
+
+   - *Scenario:* User enters a valid Salesman Code.
+   - *Test Case:* Verify that entering a valid Salesman Code auto-populates the Salesman Name from the Salesman Resume master form.
+
+   - *Scenario:* User starts typing the first 2-3 numbers of the Salesman Code in the dropdown.
+   - *Test Case:* Confirm that a dropdown appears, populating records based on the search in the dropdown.
+
+**Step 3: Customer Details Functionality:**
+
+   - *Scenario:* User enters a valid Customer Code.
+   - *Test Case:* Verify that entering a valid Customer Code auto-populates related fields (Customer Name (Eng), Customer Name (Thai), Address, District, Sub-District, Province) from the Customer Master Maintenance form.
+
+   - *Scenario:* User clicks on the Zip Code field.
+   - *Test Case:* Confirm that the system provides functionality to select a zip code based on the district in the future.
+
+   - *Scenario:* User selects the Customer Code field.
+   - *Test Case:* Ensure that the Customer Code field type is changed from text to a smart dropdown, populating data from the Customer Master Maintenance form.
+
+   - *Scenario:* User leaves the Zip Code field empty.
+   - *Test Case:* Validate that the system prompts the user to fill the mandatory Zip Code field in the Customer Details section.
+
+**Step 4: Handling Without VAT Flag:**
+
+   - *Scenario:* User selects the "Without VAT" checkbox.
+   - *Test Case:* Verify that selecting the checkbox flags the Without VAT field as read-only, denoting that the customer does not require VAT.
+
+**Step 5: Employee Code Entry and Dealer Field Removal:**
+
+   - *Scenario:* User manually enters an Employee Code.
+   - *Test Case:* Confirm that the system allows the user to manually input the Employee Code.
+
+   - *Scenario:* User navigates through the fields.
+   - *Test Case:* Ensure that the Dealer field is removed from the screen in the new system.
+
+**Step 6: Business Place and Tax ID Handling:**
+
+   - *Scenario:* User manually enters Business Place and Tax ID for specific Customer Codes.
+   - *Test Case:* Confirm that the system allows manual entry and displays an error message if the entered Tax ID/Business Place is incorrect.
+
+**Step 7: Validating Salesman Code against Dealer Code:**
+
+   - *Scenario:* User enters a Salesman Code identical to the Dealer Code.
+   - *Test Case:* Ensure that the system displays an error message indicating that the Salesman Code should not be the same as the Dealer Code.
+
+**Step 8: Auto-Population of Payment Due Days:**
+
+   - *Scenario:* User selects a Payment Term from the dropdown.
+   - *Test Case:* Verify that selecting a Payment Term auto-populates the Payment Due Days field and makes it unchangeable.
+
+**Step 9: SAP Fields Data Entry and Validation:**
+
+   - *Scenario:* User manually enters data in SAP fields (Asset No, Purchase Reqn No, Cost Center Charge, SAP Budget No., Term (Years), WBS).
+   - *Test Case:* Confirm that the system allows manual entry, and check whether there's a need for API calls for validation.
+
+**Step 10: Email Field Functionality:**
+
+   - *Scenario:* User enters a valid email address fetched from Customer Master Maintenance.
+   - *Test Case:* Verify that the system accepts the valid email address.
+
+   - *Scenario:* User enters an email address with missing '@' or '.' or contains special characters.
+   - *Test Case:* Confirm that the system displays a warning message for an invalid email format.
+
+**Step 11: Vehicle Details Table Enhancement:**
+
+   - *Scenario:* User navigates to the Vehicle details table.
+   - *Test Case:* Ensure that Booking No. and Customer Name columns are added along with Series and Model/Suffix.
+
+   - *Scenario:* User clicks on the link in the Vehicle details section.
+   - *Test Case:* Confirm that the system redirects to the Matched Data Screen, and the vehicle-related data is fetched from there.
+
+   - *Scenario:* More than 20 records in the Vehicle details table.
+   - *Test Case:* Verify that pagination is maintained, displaying 10 or 20 records per page.
+
+   - *Scenario:* User utilizes search criteria and multiselect dropdown in the Vehicle details section.
+   - *Test Case:* Confirm the presence and functionality of search criteria, multiselect dropdown, and sorting in the table list.
+
+   - *Scenario:* User selects checkboxes for specific vehicles.
+   - *Test Case:* Validate that selected records are displayed at the top of the list.
+
+**Step 12: Screen Button Modifications:**
+
+   - *Scenario:* User navigates through the screen.
+   - *Test Case:* Ensure that the Vehicle List button is removed in the new system.
+
+   - *Scenario:* User selects the checkbox for leasing customer details.
+   - *Test Case:* Confirm that Leasing Customer Details are enabled when the checkbox is selected.
+
+   - *Scenario:* User navigates through the screen.
+   - *Test Case:* Ensure that the Print Invoice button is removed, and a Preview button is added. Verify that the Issue Invoice is enabled only after clicking Preview.
+
+**Step 13: W/S Selling Price Field Functionality:**
+
+   - *Scenario:* User enters vehicle details in the table.
+   - *Test Case:* Confirm that the W/S Selling Price field gets populated and is editable.
+
+**Step 14: Fetching Price Details from Price Master Maintenance:**
+
+   - *Scenario:* User clicks on the "Get Price" button in the Vehicle details section.
+   - *Test Case:* Confirm that the system fetches the price details from the Price Master Maintenance form and updates the relevant fields.
+
+**Step 15: SAP Integration for Issuing Invoice:**
+
+   - *Scenario:* User clicks on the "Issue Invoice" button after completing all details.
+   - *Test Case:* Verify that the details related to issuing the invoice are sent to the SAP system.
+
+These detailed test case scenarios and test cases cover each step of the provided information for the "Direct Sales Invoice Issuing" screen. They aim to ensure thorough testing of the specified functionality and behavior of the system.
