@@ -328,237 +328,36 @@ type: kubernetes.io/dockerconfigjson
 ---------------------------------------------------------------------------------------
 in .dockerconfigjson you can use base64 to encode Base64 string encoder/decoder - IT Tools (it-tools.tech)
 --------------------
-Access Details : This screen can be accessed by Admin and TMT/SN.
-Menu/Navigation: Invoicing and Registration--> Invoicing--> Direct Sales Invoice Issuing.
-In the ‘Inquiry’ section, Invoice date is system generated and ‘Invoice’ no. will auto generate after clicking on ’Issue Invoice' button.
+Access Details : This  screen can be accessed by Admin and TMT/SN.
 
-When user provides the Salesman Code, the Salesman name should auto-populate. The Salesman code data come from Salesman Resume master form. Navigation should be Dealer Operations->>Salesman Profile Input and Report>>Salesman Resume (approval).
+Navigation should be Invoicing and Registration-->Series Man Invoicing issuing for Incomplete/Hold Car.
 
-The Salesman code should be made a dropdown so if user puts first 2-3 numbers, then it will populate records based on the search in the dropdown. 
+In Inquiry section there will be a radio button Issue- For issuing invoice for incomplete/Hold Car and Inquiry- This radio button should be removed from the screen.
 
-Once user enters Customer Code other fields related to customer (Customer Name (Eng), Customer Name (Thai), Address, District, Sub-District, Province) should be auto populated. As per current functionality user can enter Zip code manually. However, in future there can be a new screen once user clicks on Zip code field to select zip code based on district. Customer code field type needs to be changed from text to smart dropdown and the data come from Customer Master Maintenance form. Zip code should be a mandatory field in Customer details section.
-
-If customer is domestic, then Customer detail section accept from Address field should be autocomplete. If customer is from outside of the country, then Customer Details section should be text field 
-
-Without Vat should be read only field in new system. We can use it as a flag. This data come from Customer Master Maintenance form. If user would have selected check box for Without VAT, then it denotes that specific customer does not require VAT.
-
-Emp code will be manually entered by the user. Emp Code should be enabled based on select Specific Customer Code (7 Staff Cash Sales) . Dealer field will be removed in the new system.
-
-For some Customer Code Business Place and Tax Id fields should be manually entered and for some Customer Code it will be automatically Populated. If the entered Tax Id/ Business Place is wrong, then system should display error message.
-
-When user enters salesman code, it should not be the same as dealer code.
-
-When user selects Payment Term from drop down, then Payment due days field will be auto populated and cannot be changed.
-
-Other fields from Payment Term Details section (Asset No, Purchase Reqn No, Cost Center Charge, SAP Budget No., Term (Years), WBS) come from SAP and user can enter the data manually. Currently we do not have any field validation to check whether the user have entered the correct data or not. Business will check whether any API call is required for validation or not.
-
-Email field should be added in Customer details section as a mandatory field. The email addresses should be fetched from Customer Master Maintenance screen. If the user enters wrong email id (if @ /. is missing or entered any special character) then system should display a warning message. Email Id can be overwritten even after fetched from Customer Master Maintenance screen. 
+For Issuing the invoice, user have to select the dealer code and basis on this the ‘Sales type’ and ‘Series’ field of the Vehicle in vehicle section will auto populate.
 
 Add Booking no. and customer name column in the Vehicle details table along with the existing columns. Also add Series and Model/Suffix in Vehicle table as column
 
-There will be a link on Vehicle details section to redirect to Matched Data Screen and the vehicle related data should come from there.
+There will be a link on Vehicle details section to redirect to Matched Data Screen and the vehicle related data should come from there. Vehicle list button should be removed from the new system.
 
-If there are more than 20 records in Vehicle details table, then we need to maintain the pagination and each page we can have 10/20 records.
+Based on the search  the Vin no. , Engine Prefix, Engine No, Exterior color, color type, Status and Y or Blank will be the column fields in the table and the information related to model, series and dealer code will be auto populate in the respective columns. 
 
-Add search criteria section with Booking No and Customer Name field along with search button. Also add multiselect dropdown for other columns. Sorting functionality should be there in table list as well.
+We can have Series Man Invoice Issuing for Incomplete/Hold Car and Direct Sales Invoice Issuing in a single screen having two different tabs. As user roles are different for these two screens, so there should be restriction for both the users. Users can access the screen based on their roles.
 
-Check boxes need to be there in the table list to select specific vehicles. Once user select checkbox, the select records can be on the top of the list.
+In ‘Price Details(without Vat)’ section, on clicking the ‘Get Price’ button the W/S selling Price (Unit) field will get auto populated. It is also editable for the user.
 
-Vehicle List button should be removed in the new system.
+‘W/S Air Price(Unit) , ‘Trade Discount’ Field and 'Remarks’ field is a free text where user can fill the details.
 
-Leasing Customer Details can be enabled once user selects the checkbox.
+The ‘Invoice Amount’ section will autogenerate from the system.
 
-Print Invoice button not required and can be removed.
+In ’Customer Details' section, the customer name should be changed based on the dealer code. The ‘Tax ID’ and ‘Business Place’ should be auto-populated and non editable field.
 
-Need a Preview button in place of Print Invoice. Once user clicks on it then only Issue invoice will be enabled.
+In ‘Payment Term Details’ the Payment term field and Payment Due Date will be populated from ‘Payment Master Maintenance’ Screen, basis on selection of ‘Y’ in customer type. The 'Cost Centre’ is a text field.
 
-Once user enter Vehicle details in table then W/S Selling Price field will get populated, and user can also edit it.
+There should be one ‘Print Preview’ button to be added and ‘Print Invoice’ button should be removed from the system.
 
-Get Price details come from Price Master Maintenance form.
+The 'Print Preview button will allow the user to preview all the details. Once user clicks on it then only Issue invoice will be enabled.
+
+The user can click on ’Issue Invoice' button to issue the invoice.
 
 Details related to Issue Invoice should be send to SAP system.
-
-/---
-**Test Scenarios and Test Cases for Direct Sales Invoice Issuing Screen:**
-
-**Scenario 1: Accessing Direct Sales Invoice Issuing Screen:**
-
-1.1 **Admin Access:**
-   - *Scenario:* Admin logs in and navigates to Invoicing and Registration -> Invoicing -> Direct Sales Invoice Issuing.
-   - *Test Case:* Confirm that the admin can successfully access the Direct Sales Invoice Issuing screen.
-
-1.2 **TMT/SN Access:**
-   - *Scenario:* TMT/SN user logs in and navigates to Invoicing and Registration -> Invoicing -> Direct Sales Invoice Issuing.
-   - *Test Case:* Ensure that the TMT/SN user can successfully access the Direct Sales Invoice Issuing screen.
-
-**Scenario 2: Salesman Code Functionality:**
-
-2.1 **Entering Valid Salesman Code:**
-   - *Scenario:* User enters a valid Salesman Code.
-   - *Test Case:* Verify that entering a valid Salesman Code auto-populates the Salesman Name from the Salesman Resume master form.
-
-2.2 **Salesman Code Dropdown Search:**
-   - *Scenario:* User starts typing the first 2-3 numbers of the Salesman Code.
-   - *Test Case:* Confirm that a dropdown appears, populating records based on the search in the dropdown.
-
-2.3 **Salesman Code Dropdown Selection:**
-   - *Scenario:* User selects a Salesman Code from the dropdown.
-   - *Test Case:* Ensure that the system allows the user to select a Salesman Code from the dropdown.
-
-**Scenario 3: Customer Details Functionality:**
-
-3.1 **Entering Valid Customer Code:**
-   - *Scenario:* User enters a valid Customer Code.
-   - *Test Case:* Verify that entering a valid Customer Code auto-populates related fields (Customer Name (Eng), Customer Name (Thai), Address, District, Sub-District, Province) from the Customer Master Maintenance form.
-
-3.2 **Zip Code Field Functionality:**
-   - *Scenario:* User clicks on the Zip Code field.
-   - *Test Case:* Confirm that the system provides functionality to select a zip code based on the district in the future.
-
-3.3 **Customer Code Dropdown Transformation:**
-   - *Scenario:* User selects the Customer Code field.
-   - *Test Case:* Ensure that the Customer Code field type is changed from text to a smart dropdown, populating data from the Customer Master Maintenance form.
-
-3.4 **Mandatory Zip Code Field:**
-   - *Scenario:* User leaves the Zip Code field empty.
-   - *Test Case:* Validate that the system prompts the user to fill the mandatory Zip Code field in the Customer Details section.
-
-**Scenario 4: Domestic and International Customer Handling:**
-
-4.1 **Domestic Customer Handling:**
-   - *Scenario:* Customer is domestic, and the user interacts with the Address field.
-   - *Test Case:* Ensure that the Address field accepts input and provides autocomplete functionality for domestic customers.
-
-4.2 **International Customer Handling:**
-   - *Scenario:* Customer is from outside the country, and the user interacts with the Customer Details section.
-   - *Test Case:* Confirm that the Customer Details section allows free text input for international customers.
-
-These initial test scenarios and test cases cover the steps related to accessing the screen, handling Salesman Code, and populating customer details. Further scenarios will be created in subsequent interactions. Please share more details if needed.
----
-**Scenario 5: Handling Without VAT Flag:**
-
-5.1 **Selecting Without VAT Checkbox:**
-   - *Scenario:* User selects the "Without VAT" checkbox.
-   - *Test Case:* Verify that selecting the checkbox flags the Without VAT field as read-only, denoting that the specific customer does not require VAT.
-
-**Scenario 6: Employee Code Entry and Dealer Field Removal:**
-
-6.1 **Manually Entering Employee Code:**
-   - *Scenario:* User manually enters an Employee Code.
-   - *Test Case:* Confirm that the system allows the user to manually input the Employee Code.
-
-6.2 **Enabling Emp Code based on Specific Customer Code:**
-   - *Scenario:* User selects a specific Customer Code (7 Staff Cash Sales) and interacts with the Emp Code field.
-   - *Test Case:* Ensure that the Emp Code field is enabled only when the user selects the specific Customer Code.
-
-6.3 **Dealer Field Removal:**
-   - *Scenario:* User navigates through the fields.
-   - *Test Case:* Ensure that the Dealer field is removed from the screen in the new system.
-
-**Scenario 7: Handling Business Place and Tax ID Fields:**
-
-7.1 **Manually Entering Business Place and Tax ID:**
-   - *Scenario:* User manually enters Business Place and Tax ID for specific Customer Codes.
-   - *Test Case:* Confirm that the system allows manual entry and displays an error message if the entered Tax ID/Business Place is incorrect.
-
-**Scenario 8: Salesman Code vs. Dealer Code Validation:**
-
-8.1 **Entering Salesman Code:**
-   - *Scenario:* User enters a Salesman Code.
-   - *Test Case:* Verify that the system accepts the Salesman Code.
-
-8.2 **Validation Against Dealer Code:**
-   - *Scenario:* Salesman Code is the same as the Dealer Code.
-   - *Test Case:* Ensure that the system displays an error message indicating that the Salesman Code should not be the same as the Dealer Code.
-
-**Scenario 9: Payment Term Functionality:**
-
-9.1 **Selecting Payment Term:**
-   - *Scenario:* User selects a Payment Term from the dropdown.
-   - *Test Case:* Verify that selecting a Payment Term auto-populates the Payment Due Days field and makes it unchangeable.
-
-**Scenario 10: SAP Fields Data Entry and Validation:**
-
-10.1 **Manually Entering SAP Fields:**
-   - *Scenario:* User manually enters data in SAP fields (Asset No, Purchase Reqn No, Cost Center Charge, SAP Budget No., Term (Years), WBS).
-   - *Test Case:* Confirm that the system allows manual entry, and check whether there's a need for API calls for validation.
-
-These test scenarios and test cases cover the specific functionalities related to Without VAT flag, Employee Code, Dealer field removal, Business Place, Tax ID handling, Salesman Code validation, Payment Term functionality, and SAP Fields data entry. Further scenarios will be created as needed. Please provide more details if required.
---
-**Scenario 11: Email Field and Validation:**
-
-11.1 **Adding Email Field:**
-   - *Scenario:* Email field is added in the Customer details section.
-   - *Test Case:* Confirm that the Email field is added as a mandatory field.
-
-11.2 **Fetching Email from Customer Master Maintenance:**
-   - *Scenario:* User enters a Customer Code, and the Email field fetches the email address from the Customer Master Maintenance screen.
-   - *Test Case:* Verify that the Email field fetches the correct email address.
-
-11.3 **Invalid Email Input:**
-   - *Scenario:* User enters an invalid email address (missing '@' or '.' or contains special characters).
-   - *Test Case:* Confirm that the system displays a warning message for an invalid email format.
-
-11.4 **Overwriting Email Address:**
-   - *Scenario:* User overwrites the email address even after fetching it from the Customer Master Maintenance screen.
-   - *Test Case:* Verify that the system allows overwriting of the email address.
-
-**Scenario 12: Enhancing Vehicle Details Table:**
-
-12.1 **Adding Columns:**
-   - *Scenario:* User navigates to the Vehicle details table.
-   - *Test Case:* Ensure that Booking No., Customer Name, Series, and Model/Suffix columns are added along with the existing ones.
-
-12.2 **Redirecting to Matched Data Screen:**
-   - *Scenario:* User clicks on the link in the Vehicle details section.
-   - *Test Case:* Confirm that the system redirects to the Matched Data Screen, and the vehicle-related data is fetched from there.
-
-12.3 **Handling More Than 20 Records:**
-   - *Scenario:* There are more than 20 records in the Vehicle details table.
-   - *Test Case:* Verify that pagination is maintained, displaying 10 or 20 records per page.
-
-12.4 **Search Criteria and Multiselect Dropdown:**
-   - *Scenario:* User utilizes search criteria and multiselect dropdown in the Vehicle details section.
-   - *Test Case:* Confirm the presence and functionality of search criteria, multiselect dropdown, and sorting in the table list.
-
-12.5 **Selecting Specific Vehicles with Checkboxes:**
-   - *Scenario:* User selects checkboxes for specific vehicles.
-   - *Test Case:* Validate that selected records are displayed at the top of the list.
-
-**Scenario 13: System Button Modifications:**
-
-13.1 **Removing Vehicle List Button:**
-   - *Scenario:* User navigates through the screen.
-   - *Test Case:* Ensure that the Vehicle List button is removed in the new system.
-
-13.2 **Enabling Leasing Customer Details:**
-   - *Scenario:* User selects the checkbox for leasing customer details.
-   - *Test Case:* Confirm that Leasing Customer Details are enabled when the checkbox is selected.
-
-13.3 **Removing Print Invoice Button:**
-   - *Scenario:* User navigates through the screen.
-   - *Test Case:* Ensure that the Print Invoice button is removed.
-
-13.4 **Adding Preview Button:**
-   - *Scenario:* User navigates through the screen.
-   - *Test Case:* Confirm that a Preview button is added in place of the Print Invoice button.
-
-13.5 **Enabling Issue Invoice after Preview:**
-   - *Scenario:* User clicks on the Preview button.
-   - *Test Case:* Verify that the Issue Invoice button is enabled only after clicking Preview.
-
-**Scenario 14: W/S Selling Price and SAP Integration:**
-
-14.1 **Populating W/S Selling Price:**
-   - *Scenario:* User enters vehicle details in the table.
-   - *Test Case:* Confirm that the W/S Selling Price field gets populated, and the user can edit it.
-
-14.2 **Fetching Price Details from Price Master Maintenance:**
-   - *Scenario:* User clicks on the "Get Price" button in the Vehicle details section.
-   - *Test Case:* Confirm that the system fetches the price details from the Price Master Maintenance form and updates the relevant fields.
-
-14.3 **Sending Details to SAP for Issue Invoice:**
-   - *Scenario:* User clicks on the "Issue Invoice" button after completing all details.
-   - *Test Case:* Verify that the details related to issuing the invoice are sent to the SAP system.
-
-These test scenarios and test cases cover the specified functionalities related to the Email field, Vehicle Details Table enhancement, system button modifications, W/S Selling Price, and SAP integration for issuing an invoice. Additional scenarios can be created as needed. If you have more details or specific scenarios to cover, feel free to share them.
