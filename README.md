@@ -484,3 +484,81 @@ These initial test scenarios and test cases cover the steps related to accessing
    - *Test Case:* Confirm that the system allows manual entry, and check whether there's a need for API calls for validation.
 
 These test scenarios and test cases cover the specific functionalities related to Without VAT flag, Employee Code, Dealer field removal, Business Place, Tax ID handling, Salesman Code validation, Payment Term functionality, and SAP Fields data entry. Further scenarios will be created as needed. Please provide more details if required.
+--
+**Scenario 11: Email Field and Validation:**
+
+11.1 **Adding Email Field:**
+   - *Scenario:* Email field is added in the Customer details section.
+   - *Test Case:* Confirm that the Email field is added as a mandatory field.
+
+11.2 **Fetching Email from Customer Master Maintenance:**
+   - *Scenario:* User enters a Customer Code, and the Email field fetches the email address from the Customer Master Maintenance screen.
+   - *Test Case:* Verify that the Email field fetches the correct email address.
+
+11.3 **Invalid Email Input:**
+   - *Scenario:* User enters an invalid email address (missing '@' or '.' or contains special characters).
+   - *Test Case:* Confirm that the system displays a warning message for an invalid email format.
+
+11.4 **Overwriting Email Address:**
+   - *Scenario:* User overwrites the email address even after fetching it from the Customer Master Maintenance screen.
+   - *Test Case:* Verify that the system allows overwriting of the email address.
+
+**Scenario 12: Enhancing Vehicle Details Table:**
+
+12.1 **Adding Columns:**
+   - *Scenario:* User navigates to the Vehicle details table.
+   - *Test Case:* Ensure that Booking No., Customer Name, Series, and Model/Suffix columns are added along with the existing ones.
+
+12.2 **Redirecting to Matched Data Screen:**
+   - *Scenario:* User clicks on the link in the Vehicle details section.
+   - *Test Case:* Confirm that the system redirects to the Matched Data Screen, and the vehicle-related data is fetched from there.
+
+12.3 **Handling More Than 20 Records:**
+   - *Scenario:* There are more than 20 records in the Vehicle details table.
+   - *Test Case:* Verify that pagination is maintained, displaying 10 or 20 records per page.
+
+12.4 **Search Criteria and Multiselect Dropdown:**
+   - *Scenario:* User utilizes search criteria and multiselect dropdown in the Vehicle details section.
+   - *Test Case:* Confirm the presence and functionality of search criteria, multiselect dropdown, and sorting in the table list.
+
+12.5 **Selecting Specific Vehicles with Checkboxes:**
+   - *Scenario:* User selects checkboxes for specific vehicles.
+   - *Test Case:* Validate that selected records are displayed at the top of the list.
+
+**Scenario 13: System Button Modifications:**
+
+13.1 **Removing Vehicle List Button:**
+   - *Scenario:* User navigates through the screen.
+   - *Test Case:* Ensure that the Vehicle List button is removed in the new system.
+
+13.2 **Enabling Leasing Customer Details:**
+   - *Scenario:* User selects the checkbox for leasing customer details.
+   - *Test Case:* Confirm that Leasing Customer Details are enabled when the checkbox is selected.
+
+13.3 **Removing Print Invoice Button:**
+   - *Scenario:* User navigates through the screen.
+   - *Test Case:* Ensure that the Print Invoice button is removed.
+
+13.4 **Adding Preview Button:**
+   - *Scenario:* User navigates through the screen.
+   - *Test Case:* Confirm that a Preview button is added in place of the Print Invoice button.
+
+13.5 **Enabling Issue Invoice after Preview:**
+   - *Scenario:* User clicks on the Preview button.
+   - *Test Case:* Verify that the Issue Invoice button is enabled only after clicking Preview.
+
+**Scenario 14: W/S Selling Price and SAP Integration:**
+
+14.1 **Populating W/S Selling Price:**
+   - *Scenario:* User enters vehicle details in the table.
+   - *Test Case:* Confirm that the W/S Selling Price field gets populated, and the user can edit it.
+
+14.2 **Fetching Price Details from Price Master Maintenance:**
+   - *Scenario:* User clicks on the "Get Price" button in the Vehicle details section.
+   - *Test Case:* Confirm that the system fetches the price details from the Price Master Maintenance form and updates the relevant fields.
+
+14.3 **Sending Details to SAP for Issue Invoice:**
+   - *Scenario:* User clicks on the "Issue Invoice" button after completing all details.
+   - *Test Case:* Verify that the details related to issuing the invoice are sent to the SAP system.
+
+These test scenarios and test cases cover the specified functionalities related to the Email field, Vehicle Details Table enhancement, system button modifications, W/S Selling Price, and SAP integration for issuing an invoice. Additional scenarios can be created as needed. If you have more details or specific scenarios to cover, feel free to share them.
