@@ -434,3 +434,53 @@ Details related to Issue Invoice should be send to SAP system.
    - *Test Case:* Confirm that the Customer Details section allows free text input for international customers.
 
 These initial test scenarios and test cases cover the steps related to accessing the screen, handling Salesman Code, and populating customer details. Further scenarios will be created in subsequent interactions. Please share more details if needed.
+---
+**Scenario 5: Handling Without VAT Flag:**
+
+5.1 **Selecting Without VAT Checkbox:**
+   - *Scenario:* User selects the "Without VAT" checkbox.
+   - *Test Case:* Verify that selecting the checkbox flags the Without VAT field as read-only, denoting that the specific customer does not require VAT.
+
+**Scenario 6: Employee Code Entry and Dealer Field Removal:**
+
+6.1 **Manually Entering Employee Code:**
+   - *Scenario:* User manually enters an Employee Code.
+   - *Test Case:* Confirm that the system allows the user to manually input the Employee Code.
+
+6.2 **Enabling Emp Code based on Specific Customer Code:**
+   - *Scenario:* User selects a specific Customer Code (7 Staff Cash Sales) and interacts with the Emp Code field.
+   - *Test Case:* Ensure that the Emp Code field is enabled only when the user selects the specific Customer Code.
+
+6.3 **Dealer Field Removal:**
+   - *Scenario:* User navigates through the fields.
+   - *Test Case:* Ensure that the Dealer field is removed from the screen in the new system.
+
+**Scenario 7: Handling Business Place and Tax ID Fields:**
+
+7.1 **Manually Entering Business Place and Tax ID:**
+   - *Scenario:* User manually enters Business Place and Tax ID for specific Customer Codes.
+   - *Test Case:* Confirm that the system allows manual entry and displays an error message if the entered Tax ID/Business Place is incorrect.
+
+**Scenario 8: Salesman Code vs. Dealer Code Validation:**
+
+8.1 **Entering Salesman Code:**
+   - *Scenario:* User enters a Salesman Code.
+   - *Test Case:* Verify that the system accepts the Salesman Code.
+
+8.2 **Validation Against Dealer Code:**
+   - *Scenario:* Salesman Code is the same as the Dealer Code.
+   - *Test Case:* Ensure that the system displays an error message indicating that the Salesman Code should not be the same as the Dealer Code.
+
+**Scenario 9: Payment Term Functionality:**
+
+9.1 **Selecting Payment Term:**
+   - *Scenario:* User selects a Payment Term from the dropdown.
+   - *Test Case:* Verify that selecting a Payment Term auto-populates the Payment Due Days field and makes it unchangeable.
+
+**Scenario 10: SAP Fields Data Entry and Validation:**
+
+10.1 **Manually Entering SAP Fields:**
+   - *Scenario:* User manually enters data in SAP fields (Asset No, Purchase Reqn No, Cost Center Charge, SAP Budget No., Term (Years), WBS).
+   - *Test Case:* Confirm that the system allows manual entry, and check whether there's a need for API calls for validation.
+
+These test scenarios and test cases cover the specific functionalities related to Without VAT flag, Employee Code, Dealer field removal, Business Place, Tax ID handling, Salesman Code validation, Payment Term functionality, and SAP Fields data entry. Further scenarios will be created as needed. Please provide more details if required.
