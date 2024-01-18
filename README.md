@@ -378,3 +378,59 @@ Get Price details come from Price Master Maintenance form.
 
 Details related to Issue Invoice should be send to SAP system.
 
+/---
+**Test Scenarios and Test Cases for Direct Sales Invoice Issuing Screen:**
+
+**Scenario 1: Accessing Direct Sales Invoice Issuing Screen:**
+
+1.1 **Admin Access:**
+   - *Scenario:* Admin logs in and navigates to Invoicing and Registration -> Invoicing -> Direct Sales Invoice Issuing.
+   - *Test Case:* Confirm that the admin can successfully access the Direct Sales Invoice Issuing screen.
+
+1.2 **TMT/SN Access:**
+   - *Scenario:* TMT/SN user logs in and navigates to Invoicing and Registration -> Invoicing -> Direct Sales Invoice Issuing.
+   - *Test Case:* Ensure that the TMT/SN user can successfully access the Direct Sales Invoice Issuing screen.
+
+**Scenario 2: Salesman Code Functionality:**
+
+2.1 **Entering Valid Salesman Code:**
+   - *Scenario:* User enters a valid Salesman Code.
+   - *Test Case:* Verify that entering a valid Salesman Code auto-populates the Salesman Name from the Salesman Resume master form.
+
+2.2 **Salesman Code Dropdown Search:**
+   - *Scenario:* User starts typing the first 2-3 numbers of the Salesman Code.
+   - *Test Case:* Confirm that a dropdown appears, populating records based on the search in the dropdown.
+
+2.3 **Salesman Code Dropdown Selection:**
+   - *Scenario:* User selects a Salesman Code from the dropdown.
+   - *Test Case:* Ensure that the system allows the user to select a Salesman Code from the dropdown.
+
+**Scenario 3: Customer Details Functionality:**
+
+3.1 **Entering Valid Customer Code:**
+   - *Scenario:* User enters a valid Customer Code.
+   - *Test Case:* Verify that entering a valid Customer Code auto-populates related fields (Customer Name (Eng), Customer Name (Thai), Address, District, Sub-District, Province) from the Customer Master Maintenance form.
+
+3.2 **Zip Code Field Functionality:**
+   - *Scenario:* User clicks on the Zip Code field.
+   - *Test Case:* Confirm that the system provides functionality to select a zip code based on the district in the future.
+
+3.3 **Customer Code Dropdown Transformation:**
+   - *Scenario:* User selects the Customer Code field.
+   - *Test Case:* Ensure that the Customer Code field type is changed from text to a smart dropdown, populating data from the Customer Master Maintenance form.
+
+3.4 **Mandatory Zip Code Field:**
+   - *Scenario:* User leaves the Zip Code field empty.
+   - *Test Case:* Validate that the system prompts the user to fill the mandatory Zip Code field in the Customer Details section.
+
+**Scenario 4: Domestic and International Customer Handling:**
+
+4.1 **Domestic Customer Handling:**
+   - *Scenario:* Customer is domestic, and the user interacts with the Address field.
+   - *Test Case:* Ensure that the Address field accepts input and provides autocomplete functionality for domestic customers.
+
+4.2 **International Customer Handling:**
+   - *Scenario:* Customer is from outside the country, and the user interacts with the Customer Details section.
+   - *Test Case:* Confirm that the Customer Details section allows free text input for international customers.
+
+These initial test scenarios and test cases cover the steps related to accessing the screen, handling Salesman Code, and populating customer details. Further scenarios will be created in subsequent interactions. Please share more details if needed.
