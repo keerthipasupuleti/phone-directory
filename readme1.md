@@ -1,31 +1,63 @@
-Navigation should be Invoicing and Registration-->Series Man Invoicing issuing for Incomplete/Hold Car.
+Invoice should be already existing and not cancelled
 
-In Inquiry section there will be a radio button Issue- For issuing invoice for incomplete/Hold Car and Inquiry- This radio button should be removed from the screen. 
+Enter VIN no. in Vin Number text field under Inquiry section. System should fetch the Invoice No. and Invoice Number field will get auto populated.
 
-For Issuing the invoice, user have to select the dealer code and basis on this the ‘Sales type’ and ‘Series’ field of the Vehicle in vehicle section will auto populate. ‘Sales Type’ needs to be automatic default as domestic.
+ 2.Enter Invoice No. in Invoice No. text field or VIN no. in Vin Number text field under Inquiry section and click on execute button other fields should get auto populated and click on Issue Credit Note button to generate a Credit Note.
 
-Add Booking no. and customer name column in the Vehicle details table along with the existing columns. Also add Series and Model/Suffix in Vehicle table as column
+3.When user finds that he wants to change (decrease) the price of the vehicle, then he must Issue the Credit Note. He needs to follow the below steps: 
 
-There will be a link on Vehicle details section to redirect to Incomplete Car Reason Master and the vehicle related data should come from there. Vehicle list button should be removed from the new system.
+         a)  Inquiry section Invoice Number and Credit Note. text field should be enabled, and other fields should be disable. Type of change should be Price or Unit. Enter Credit Note No. in the Credit Note No. text field and select Price radio button as Type.
 
-Based on the search the Vin number, Engine Prefix, Engine No, Exterior color, color type, Status and Y or Blank will be the column fields in the table and the information related to model, series and dealer code will be auto populate in the respective columns. 
+       b) In case of select option as Price and execute, system will check the price of each car in that invoice from Price master @ system date timing.
 
- In ‘Price Details (without Vat)’ section, on clicking the ‘Get Price’ button the W/S selling Price (Unit) field will get auto populated. It is also editable for the user.
+     c) If all cars have same price, system will auto select “All Car" and user can select "Each Car" (System default at All Car)
 
-‘W/S Air Price (Unit), ‘Trade Discount’ Field and 'Remarks’ field is a free text where user can fill the details.
+    d)  When user selects Each car radio button the New Car Price and Air Car Price column will be enabled in Vehicle details table with data populated from Price Master. User can change new car price and air price by manual. 
 
-The ‘Invoice Amount’ section will autogenerate from the system.
+    e) User can change (Total) New Unit Price same as current operation and not equal to '0'.
 
-In ’Customer Details' section, the customer’s name should be changed based on the dealer code. The ‘Tax ID’ and ‘Business Place’ should be auto populated and non-editable field.
+    f)  User can change (Total) Air Price same as the current operation.
 
-In ‘Payment Term Details’ the Payment term field and Payment Due Date will be populated from ‘Payment Master Maintenance’ Screen, basis on selection of ‘Y’ in customer type. The 'Cost Centre’ is a text field.
+   g) If All cars have different price, system will auto select as "Each Car" with warning message.
 
-There should be one ‘Print Preview’ button to be added and ‘Print Invoice’ button should be removed from the system.
+and user cannot change from "Each Car" to "All Car."
 
-The 'Print Preview button will allow the user to preview all the details. Once user clicks on it then only Issue invoice will be enabled.
+ h) New amount should be auto calculate based on modified price data
 
-Once invoice has been issued, button ‘Issue invoice' is disabled for that invoice no. permanently and only 'Print Preview’ button will be enabled.
+If user select option as unit and execute. "All Car" and "Each Car" radio button will be disabled. New Car Price and Air Price will disable.
 
-The user can click on ’Issue Invoice' button to issue the invoice.
+4. Brand, Series, Model and Suffix should be displayed as text field in Vehicle details section as per current screen.
 
-Details related to Issue Invoice should be send to SAP system.
+5. Motor (For EV vehicles) from the Vehicle Details table and add as Additional column in vehicle details table along with the existing columns.
+
+6.VAT % field value should be 7 in Invoice Amount Details section.
+
+7.Email field should be added in Customer details section as a mandatory field. The email addresses should be fetched from Customer Master Maintenance screen. This field is not editable. 
+
+8.Customer details section cannot be editable for domestic customers, and it will be auto populated from Customer Master Maintenance screen. 
+
+9.Remove Print Credit Note button.
+
+Add Process:
+
+Add is not allowed in this screen.
+
+Edit Process:
+
+Edit is allowed for Inquiry Section:
+
+Invoice No.
+
+Credit Note No.
+
+Edit is allowed for Invoice Amount Details (without Vat)’ section
+
+Reason drop down
+
+Cancel drop down
+
+Buttons:
+
+Cancel Credit Note: To cancel the credit Note
+
+Issue Credit Note: To generate the Credit Note
