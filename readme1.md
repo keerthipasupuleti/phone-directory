@@ -1,63 +1,58 @@
-Invoice should be already existing and not cancelled
+PROCEDURE FP_TBR_WHN_NEW_FRM_INSTNC IS
+   l_v_ret_type     VARCHAR2(1);
+   l_v_mod_nm       TBR_ERR_MST.EM_MOD_NM%TYPE;
+   l_v_err_cd       TBR_ERR_MST.EM_ERR_CD%TYPE;
+   l_n_status       NUMBER;
+   -- Variable for Version control
+   l_v_version      TBR_PROG_DTLS.TPD_VERSION1%TYPE := '1.0';
+   l_v_prog_id      TBR_PROG_DTLS.TPD_PROG_ID%TYPE := GET_APPLICATION_PROPERTY(CURRENT_FORM_NAME);
+BEGIN
+   :GLOBAL.SM_ID := :GLOBAL.SM_ID;
+   IF :GLOBAL.G_C_ERR = 'T' THEN
+      EXIT_FORM;
+   END IF;
 
-Enter VIN no. in Vin Number text field under Inquiry section. System should fetch the Invoice No. and Invoice Number field will get auto populated.
+   LP_TBR016_WINPROC_INV('INV',:GLOBAL.WIN_TYP,'VAT Master Maintenance (FINV60155 Ver ' || l_v_version ||')'); 
 
- 2.Enter Invoice No. in Invoice No. text field or VIN no. in Vin Number text field under Inquiry section and click on execute button other fields should get auto populated and click on Issue Credit Note button to generate a Credit Note.
+   BEGIN
+      SELECT  SYSDATE, 
+              USER
+      INTO    :B01_GLOBAL.NBT_SYSDATE, 
+              :B01_GLOBAL.NBT_USER
+      FROM    SYS.DUAL;
+   EXCEPTION
+      WHEN NO_DATA_FOUND THEN
+         LP_TBR013_PRCDR_ERR_HNDLR ('TBR','01071',l_v_ret_type);
 
-3.When user finds that he wants to change (decrease) the price of the vehicle, then he must Issue the Credit Note. He needs to follow the below steps: 
+      WHEN TOO_MANY_ROWS THEN
+         LP_TBR013_PRCDR_ERR_HNDLR ('TBR','01072',l_v_ret_type);
+      WHEN OTHERS THEN
+         LP_TBR014_OTH_EXCPTNS;
+   END;
 
-         a)  Inquiry section Invoice Number and Credit Note. text field should be enabled, and other fields should be disable. Type of change should be Price or Unit. Enter Credit Note No. in the Credit Note No. text field and select Price radio button as Type.
+   BEGIN
+      :B01_GLOBAL.NBT_US := :B01_GLOBAL.NBT_USER;
+      :B01_GLOBAL.NBT_DT := :B01_GLOBAL.NBT_SYSDATE;
+   END;
 
-       b) In case of select option as Price and execute, system will check the price of each car in that invoice from Price master @ system date timing.
+   /* This code block will check/validate the Program Version of this program from the TBR Database.
+      If the version is validated, the system will allow the user to work with the current program,
+      otherwise it will exit.
+   */
 
-     c) If all cars have same price, system will auto select “All Car" and user can select "Each Car" (System default at All Car)
-
-    d)  When user selects Each car radio button the New Car Price and Air Car Price column will be enabled in Vehicle details table with data populated from Price Master. User can change new car price and air price by manual. 
-
-    e) User can change (Total) New Unit Price same as current operation and not equal to '0'.
-
-    f)  User can change (Total) Air Price same as the current operation.
-
-   g) If All cars have different price, system will auto select as "Each Car" with warning message.
-
-and user cannot change from "Each Car" to "All Car."
-
- h) New amount should be auto calculate based on modified price data
-
-If user select option as unit and execute. "All Car" and "Each Car" radio button will be disabled. New Car Price and Air Price will disable.
-
-4. Brand, Series, Model and Suffix should be displayed as text field in Vehicle details section as per current screen.
-
-5. Motor (For EV vehicles) from the Vehicle Details table and add as Additional column in vehicle details table along with the existing columns.
-
-6.VAT % field value should be 7 in Invoice Amount Details section.
-
-7.Email field should be added in Customer details section as a mandatory field. The email addresses should be fetched from Customer Master Maintenance screen. This field is not editable. 
-
-8.Customer details section cannot be editable for domestic customers, and it will be auto populated from Customer Master Maintenance screen. 
-
-9.Remove Print Credit Note button.
-
-Add Process:
-
-Add is not allowed in this screen.
-
-Edit Process:
-
-Edit is allowed for Inquiry Section:
-
-Invoice No.
-
-Credit Note No.
-
-Edit is allowed for Invoice Amount Details (without Vat)’ section
-
-Reason drop down
-
-Cancel drop down
-
-Buttons:
-
-Cancel Credit Note: To cancel the credit Note
-
-Issue Credit Note: To generate the Credit Note
+   --Commented by Amarinder on 05/09/2011 for TBR Migration - Start
+   /*
+   LP_DNS013_CHECK_VERSION (l_v_prog_id,
+                            l_v_version,
+                            l_v_mod_nm,
+                            l_v_err_cd  
+                           );
+                              
+   IF l_v_err_cd <> '00000' THEN
+      LP_TBR013_PRCDR_ERR_HNDLR (l_v_mod_nm, l_v_err_cd, l_v_ret_type);
+      EXIT_FORM(NO_VALIDATE);
+   END IF;
+   */
+   --Commented by Amarinder on 05/09/2011 for TBR Migration - End
+   EXECUTE_QUERY;
+END;
