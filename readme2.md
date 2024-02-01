@@ -1,96 +1,144 @@
-This PL/SQL block seems to define a procedure named `CANCEL_PRINT` in an Oracle Forms environment. Let's break down the key components and functionality:
+The procedure `Clear_All_Master_Details` in this PL/SQL block appears to handle the clearing of master and detail blocks in an Oracle Forms application. Let's break down its structure and functionality:
 
-### Procedure: `CANCEL_PRINT`
+### Procedure: `Clear_All_Master_Details`
 
-#### 1. **Parameter List Handling:**
+#### 1. **Declaration of Local Variables:**
    ```plsql
-   l_pl_id PARAMLIST; 
-   l_pl_name VARCHAR2(10) := 'PARAMLIST'; 
+   mastblk VARCHAR2(30); -- Initial Master Block Cusing Coord
+   coordop VARCHAR2(30); -- Operation Causing the Coord
+   trigblk VARCHAR2(30); -- Cur Block On-Clear-Details Fires On
+   startitm VARCHAR2(61); -- Item in which cursor started
+   frmstat VARCHAR2(15); -- Form Status
+   curblk VARCHAR2(30); -- Current Block
+   currel VARCHAR2(30); -- Current Relation
+   curdtl VARCHAR2(30); -- Current Detail Block
+   retblk VARCHAR2(30); -- Return Block
    ```
    - **Explanation:**
-      - Declares variables for the parameter list (`l_pl_id`) and its name (`l_pl_name`).
+      - Declaration of local variables used within the procedure.
 
-#### 2. **Exception Handling:**
+#### 2. **Function: `First_Changed_Block_Below`**
    ```plsql
-   l_e_record_locked EXCEPTION; 
-   PRAGMA EXCEPTION_INIT(l_e_record_locked, -00054); 
+   FUNCTION First_Changed_Block_Below(Master VARCHAR2) RETURN VARCHAR2 IS
    ```
    - **Explanation:**
-      - Declares a custom exception `l_e_record_locked` and associates it with Oracle error code -00054.
+      - A function that recursively searches for the first changed block below a given master block.
 
-#### 3. **Additional Variables:**
-   ```plsql
-   l_print_flg INV_DOC_HDR.IH_PRINT_FLG%TYPE := NULL; 
-   l_v_cancel_flg INV_DOC_HDR.IH_CANCEL_FLG%TYPE;
-   l_n_err_cd NUMBER;
-   l_v_ip_address VARCHAR2(15);
-   l_V_err_cd NUMBER;
-   l_v_err_msg VARCHAR2(200);
-   l_v_printer_call TBR_PRC_CTRL.tpc_val%type;
-   ```
-   - **Explanation:**
-      - Declares variables for different data types, including fields from the `INV_DOC_HDR` table, error codes, IP address, and a printer call.
-
-#### 4. **Parameter List Creation and Destruction:**
-   ```plsql
-   l_pl_id := GET_PARAMETER_LIST ('TMPDATA') ;
-   IF NOT ID_NULL (l_pl_id) THEN
-      DESTROY_PARAMETER_LIST (l_pl_id);
-   END IF;
-   
-   l_pl_id := CREATE_PARAMETER_LIST ('TMPDATA') ;
-   ```
-   - **Explanation:**
-      - Checks if the parameter list 'TMPDATA' already exists, and if so, destroys it.
-      - Creates a new parameter list 'TMPDATA'.
-
-#### 5. **Parameter Addition:**
-   ```plsql
-   ADD_PARAMETER (l_pl_id, 'P_I_V_DOC_NO', TEXT_PARAMETER, :B02_INV_DOC_HDR.NBT_INV_NO);
-   ADD_PARAMETER(l_pl_id,'P_I_V_DOC_TYP',TEXT_PARAMETER, 'I'); 
-   ADD_PARAMETER(l_pl_id,'P_I_V_SAL_CH',TEXT_PARAMETER, NULL); 
-   ADD_PARAMETER(l_pl_id,'ORIENTATION',TEXT_PARAMETER, 'PORTRAIT'); 
-   ADD_PARAMETER (l_pl_id, 'PARAMFORM', TEXT_PARAMETER, 'NO');
-   ADD_PARAMETER (l_pl_id, 'P_I_V_FRM_DT', TEXT_PARAMETER , NULL );
-   ADD_PARAMETER (l_pl_id, 'P_I_V_TO_DT', TEXT_PARAMETER , NULL );
-   ```
-   - **Explanation:**
-      - Adds various parameters to the parameter list, including document number, type, sales channel, orientation, and date range.
-
-#### 6. **Report Execution:**
-   ```plsql
-   RP2RRO.RP2RRO_RUN_PRODUCT (REPORTS, 'RINV61045', SYNCHRONOUS, RUNTIME, FILESYSTEM, l_pl_id, NULL );
-   ```
-   - **Explanation:**
-      - Executes a report ('RINV61045') using the parameter list, specifying runtime details and file system storage.
-
-#### 7. **Activity Log Recording:**
+#### 3. **Procedure Body:**
    ```plsql
    BEGIN
-      SELECT SYS_CONTEXT('USERENV', 'IP_ADDRESS', 15) 
-      INTO	l_v_ip_address
-      FROM DUAL; 
-      
-      SP_SINV61040(:B01_GLOBAL.NBT_US,
-                   :B01_GLOBAL.NBT_DT,
-                   :B02_INV_DOC_HDR.NBT_NEW_INV_NO,
-                   'I',
-                   'P',
-                   l_v_ip_address,
-                   l_v_err_cd,
-                   l_v_err_msg
-                  );
-   END;
    ```
    - **Explanation:**
-      - Retrieves the IP address of the user.
-      - Calls a stored procedure (`SP_SINV61040`) with various parameters, including user details, document number, type, IP address, and error handling variables.
+      - Beginning of the main procedure body.
 
-#### 8. **Commented Section:**
+#### 4. **Initialize Local Variables:**
    ```plsql
-   -- ADDED BY SUVRANGSHU FOR EDF KAIZEN ON 13-10-2014 (END) --ACTIVITY LOG  
+   mastblk := :System.Master_Block; 
+   coordop := :System.Coordination_Operation; 
+   trigblk := :System.Trigger_Block; 
+   startitm := :System.Trigger_Item; 
+   frmstat := :System.Form_Status;
    ```
    - **Explanation:**
-      - A comment indicating the end of an added section by a user named Suvrangshu for EDF Kaizen on a specific date.
+      - Initializes local variables with relevant system properties.
 
-This procedure seems to handle the cancellation of a print operation, involves setting up parameters for a report, executing the report, and recording related activities in an activity log. The specific report and stored procedure being called may have further context within the application.
+#### 5. **Coordination Operation Check:**
+   ```plsql
+   IF coordop NOT IN ('CLEAR_RECORD', 'SYNCHRONIZE_BLOCKS') THEN
+   ```
+   - **Explanation:**
+      - Checks if the coordination operation is neither 'CLEAR_RECORD' nor 'SYNCHRONIZE_BLOCKS'.
+
+#### 6. **Handling Master Block:**
+   ```plsql
+   IF mastblk = trigblk THEN
+   ```
+   - **Explanation:**
+      - Checks if the master block is the block that triggered the coordination.
+
+#### 7. **Check Form Status:**
+   ```plsql
+   IF frmstat = 'CHANGED' THEN
+   ```
+   - **Explanation:**
+      - Checks if the form status is 'CHANGED'.
+
+#### 8. **Find First Changed Block Below:**
+   ```plsql
+   curblk := First_Changed_Block_Below(mastblk);
+   ```
+   - **Explanation:**
+      - Calls the `First_Changed_Block_Below` function to find the first changed block below the master.
+
+#### 9. **Handle Changed Block:**
+   ```plsql
+   IF curblk IS NOT NULL THEN
+      Go_Block(curblk); 
+      Check_Package_Failure; 
+      Clear_Block(ASK_COMMIT); 
+      
+      IF NOT ( :System.Form_Status = 'QUERY' OR :System.Block_Status = 'NEW' ) THEN
+         RAISE Form_Trigger_Failure;
+      END IF;
+   END IF;
+   ```
+   - **Explanation:**
+      - If a changed block is found, it goes to that block, checks for package failure, and clears it with an option to ask for commit.
+      - If the user cancels the commit dialog, it raises an error if the form or block status is not as expected.
+
+#### 10. **End of Conditional Checks:**
+   ```plsql
+   END IF; -- IF frmstat = 'CHANGED'
+   END IF; -- IF mastblk = trigblk
+   END IF; -- IF coordop NOT IN ('CLEAR_RECORD', 'SYNCHRONIZE_BLOCKS')
+   ```
+   - **Explanation:**
+      - Ends the conditional checks for coordination operation, master block, and form status.
+
+#### 11. **Clear All Detail Blocks:**
+   ```plsql
+   currel := Get_Block_Property(trigblk, FIRST_MASTER_RELATION);
+   WHILE currel IS NOT NULL LOOP
+      curdtl := Get_Relation_Property(currel, DETAIL_NAME);
+      IF Get_Block_Property(curdtl, STATUS) <> 'NEW' THEN
+         Go_Block(curdtl); 
+         Check_Package_Failure; 
+         Clear_Block(NO_VALIDATE); 
+         
+         IF :System.Block_Status <> 'NEW' THEN
+            RAISE Form_Trigger_Failure;
+         END IF;
+      END IF;
+      currel := Get_Relation_Property(currel, NEXT_MASTER_RELATION);
+   END LOOP;
+   ```
+   - **Explanation:**
+      - Clears all detail blocks related to the master block without asking to commit.
+
+#### 12. **Restore Cursor Position:**
+   ```plsql
+   IF :System.Cursor_Item <> startitm THEN
+      Go_Item(startitm); 
+      Check_Package_Failure;
+   END IF;
+   ```
+   - **Explanation:**
+      - Restores the cursor position to where it started.
+
+#### 13. **Exception Handling:**
+   ```plsql
+   EXCEPTION 
+      WHEN Form_Trigger_Failure THEN
+         IF :System.Cursor_Item <> startitm THEN
+            Go_Item(startitm);
+         END IF;
+         RAISE;
+   END Clear_All_Master_Details;
+   ```
+   - **Explanation:**
+      - Handles exceptions, restores the cursor if needed, and re-raises the exception.
+
+### Overall Explanation:
+
+This procedure is designed to clear all master and detail blocks based on certain conditions, especially when a master block is changed. It checks the coordination operation, the master block, and the form status before taking specific actions. The recursive function `First_Changed_Block_Below` is utilized to find the first changed block below a given master block. The procedure ensures proper handling and validation throughout the process, raising exceptions when needed.
+
