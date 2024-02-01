@@ -1,819 +1,399 @@
+/*******************************************
+ *******************************************/
+
 /*
-   Name           :  FP_INV_POPULATE_LISTS
+   Name           :  WHEN-BUTTON-PRESSED
    
    Module         :  INV
 
-   Purpose        :  To Populate Payment Term List and Series Lists
-                     
-   Calls          :  Null
-                   
-   Returns        :  Null
+   Purpose        :  Null
 
-   Steps Involved :  Check A.) Clear payment type list and create Recordgroup using DS_CODE_MST Table
-                     Check B.) Populate Payment Type List using record Group created in step A.
-                     
+   Calls          :  LP_TBR014_OTH_EXCPTNS
+
+   Returns        :  
+
+   Steps involved :  CHECK A :- Creation of parameter list if the parameter list does not already exist,
+                                if the parameter list already exists then destroy the parameter list and 
+                                create again
+                     CHECK B :- Pass the parameters and call report RINV60025
    History        :
    Author          Date               What
    ------          ----               ----
-   Gagan           24/11/2003         1.0
+   Suvrangshu Dey  01-11-2014           1.0
 */
 
+PROCEDURE CANCEL_PRINT 
+IS 
 
-
-PROCEDURE FP_INV_POPULATE_LISTS IS
-   l_rg_reason_type    RECORDGROUP;
-   l_n_status          NUMBER;
-   l_v_qry             VARCHAR2(2000);
+   l_pl_id           PARAMLIST; 
+   l_pl_name         VARCHAR2(10) := 'PARAMLIST';
+   l_print_flg       INV_DOC_HDR.IH_PRINT_FLG%TYPE := NULL;
    l_v_ret_type        TBR_ERR_MST.EM_ERR_TYP%TYPE;
-   l_v_mod_nm          TBR_ERR_MST.EM_MOD_NM%TYPE;
-   l_v_err_cd          TBR_ERR_MST.EM_ERR_CD%TYPE;
+   l_e_record_locked    EXCEPTION;
+   PRAGMA EXCEPTION_INIT(l_e_record_locked,-00054);
+   -- Added by shaily for ODC Issue 167,168 starts
+   l_v_cancel_flg    INV_DOC_HDR.IH_CANCEL_FLG%TYPE; 
+   -- Added by shaily for ODC Issue 167,168 ends
+   --ADDED BY SUVRANGSHU DEY FOR EDF KAIZEN (START) ON 13-10-2014
+   l_n_err_cd		NUMBER;
+	 l_v_ip_address	VARCHAR2(15);
+	 l_V_err_cd			NUMBER;
+	 l_v_err_msg    VARCHAR2(200);
+   --ADDED BY SUVRANGSHU DEY FOR EDF KAIZEN (START) ON 13-10-2014
+   l_v_printer_call TBR_PRC_CTRL.tpc_val%type;
 BEGIN
-   /*Check A.) Clear payment type list and create Recordgroup using DS_CODE_MST Table*/
-   CLEAR_LIST('B02_INV_DOC_HDR.NBT_REASON_CD');
 
-   l_rg_reason_type := FIND_GROUP('reason_type_rg'); 
-   IF NOT Id_Null(l_rg_reason_type) THEN 
-      DELETE_GROUP(l_rg_reason_type); 
-   END IF; 
-
-   l_v_qry := 'SELECT  CDM_CD'||'||'||''''||' '||''''||'||'||'CDM_DESC CDM_CD, CDM_CD  FROM DS_CODE_MST WHERE CDM_CD_TYP = '||''''||'RSN'||''''||'  AND CDM_RSN_TYP = '||''''||'I'||''''
-               ||' ORDER BY CDM_RPT_SEQ ';
-   l_rg_reason_type := CREATE_GROUP_FROM_QUERY ('reason_type_rg',l_v_qry);
-   l_n_status := POPULATE_GROUP('reason_type_rg');
-   -- Check if population has been successful
-
-   IF l_n_status <> 0 THEN
-       LP_TBR013_PRCDR_ERR_HNDLR('INV','20605',l_v_ret_type);
-   END IF;
-   IF l_n_status = 0 THEN
-      POPULATE_LIST('B02_INV_DOC_HDR.NBT_REASON_CD',l_rg_reason_type);
-   END IF;
-EXCEPTION
-   WHEN OTHERS THEN
-      LP_TBR014_OTH_EXCPTNS;
+		   l_pl_id := GET_PARAMETER_LIST ('TMPDATA') ;
+		   IF NOT ID_NULL (l_pl_id) THEN
+		      DESTROY_PARAMETER_LIST (l_pl_id);
+		   END IF;
+		
+		   l_pl_id := CREATE_PARAMETER_LIST ('TMPDATA') ;
+		   IF NOT Id_Null(l_pl_id) THEN 
+		      ADD_PARAMETER (l_pl_id, 'P_I_V_DOC_NO', TEXT_PARAMETER, :B02_INV_DOC_HDR.NBT_INV_NO);
+		      ADD_PARAMETER(l_pl_id,'P_I_V_DOC_TYP',TEXT_PARAMETER, 'I'); 
+		      ADD_PARAMETER(l_pl_id,'P_I_V_SAL_CH',TEXT_PARAMETER, NULL); 
+		      ADD_PARAMETER(l_pl_id,'ORIENTATION',TEXT_PARAMETER, 'PORTRAIT'); 
+		      ADD_PARAMETER (l_pl_id, 'PARAMFORM', TEXT_PARAMETER, 'NO');
+		      ADD_PARAMETER (l_pl_id, 'P_I_V_FRM_DT', TEXT_PARAMETER , NULL );
+		      ADD_PARAMETER (l_pl_id, 'P_I_V_TO_DT', TEXT_PARAMETER , NULL );
+		      RP2RRO.RP2RRO_RUN_PRODUCT (REPORTS, 'RINV61045', SYNCHRONOUS, RUNTIME, FILESYSTEM, l_pl_id, NULL );
+		   END IF;
+					/* ADDED BY SUVRANGSHU FOR EDF KAIZEN ON 13-10-2014 (START) --ACTIVITY LOG */
+					      BEGIN
+									SELECT SYS_CONTEXT('USERENV', 'IP_ADDRESS', 15) 
+									INTO	l_v_ip_address
+									FROM DUAL; 
+										SP_SINV61040(:B01_GLOBAL.NBT_US,
+										                :B01_GLOBAL.NBT_DT,
+										                :B02_INV_DOC_HDR.NBT_NEW_INV_NO,
+										                'I',
+										                'P',
+										                l_v_ip_address,
+										                l_v_err_cd,
+										                l_v_err_msg
+										                );
+								END;
+					/* ADDED BY SUVRANGSHU FOR EDF KAIZEN ON 13-10-2014 (END) --ACTIVITY LOG  */   
+		   
 END;
-
-----------------
-
-/*
-   Name           :   FP_INV_POPULATE_LIST_REISSUE
-   
-   Module         :  INV
-
-   Purpose        :  To Populate Reason Code for reissue case
-                     
-   Calls          :  Null
-                   
-   Returns        :  Null
-
-   Steps Involved :  Check A.) Clear payment type list and create Recordgroup using DS_CODE_MST Table
-                     Check B.) Populate Payment Type List using record Group created in step A.
-                     
-   History        :
-   Author          Date               What
-   ------          ----               ----
-   Gagan           24/11/2003         1.0
-*/
-
-
-
-PROCEDURE FP_INV_POPULATE_LIST_REISSUE IS
-   l_rg_reason_type    RECORDGROUP;
-   l_n_status          NUMBER;
-   l_v_qry             VARCHAR2(2000);
-   l_v_ret_type        TBR_ERR_MST.EM_ERR_TYP%TYPE;
-   l_v_mod_nm          TBR_ERR_MST.EM_MOD_NM%TYPE;
-   l_v_err_cd          TBR_ERR_MST.EM_ERR_CD%TYPE;
+--------------
+Procedure Check_Package_Failure IS
 BEGIN
-   /*Check A.) Clear payment type list and create Recordgroup using DS_CODE_MST Table*/
-   CLEAR_LIST('B02_INV_DOC_HDR.NBT_REASON_CD');
-
-   l_rg_reason_type := FIND_GROUP('reason_type_rg'); 
-   IF NOT Id_Null(l_rg_reason_type) THEN 
-      DELETE_GROUP(l_rg_reason_type); 
-   END IF; 
-
-   l_v_qry := 'SELECT  CDM_CD'||'||'||''''||' '||''''||'||'||'CDM_DESC CDM_CD, CDM_CD  FROM DS_CODE_MST WHERE CDM_CD_TYP = '||''''||'RSN'||''''||'  AND CDM_RSN_TYP = '||''''||'I'||''''
-               ||' AND CDM_CD = NVL('||''''||:B02_INV_DOC_HDR.IH_RSN_CD||''''||', CDM_CD) ORDER BY CDM_RPT_SEQ ';
-   l_rg_reason_type := CREATE_GROUP_FROM_QUERY ('reason_type_rg',l_v_qry);
-   l_n_status := POPULATE_GROUP('reason_type_rg');
-   -- Check if population has been successful
-
-   IF l_n_status <> 0 THEN
-       LP_TBR013_PRCDR_ERR_HNDLR('INV','20605',l_v_ret_type);
-   END IF;
-   IF l_n_status = 0 THEN
-      POPULATE_LIST('B02_INV_DOC_HDR.NBT_REASON_CD',l_rg_reason_type);
-   END IF;
-EXCEPTION
-   WHEN OTHERS THEN
-      LP_TBR014_OTH_EXCPTNS;
+  IF NOT ( Form_Success ) THEN
+    RAISE Form_Trigger_Failure;
+  END IF;
 END;
----
-/*
-   Name           :  FP_INV_REISSUE_INV
-   
-   Module         :  INV
+-------------
+PROCEDURE Clear_All_Master_Details IS
+  mastblk  VARCHAR2(30);  -- Initial Master Block Cusing Coord
+  coordop  VARCHAR2(30);  -- Operation Causing the Coord
+  trigblk  VARCHAR2(30);  -- Cur Block On-Clear-Details Fires On
+  startitm VARCHAR2(61);  -- Item in which cursor started
+  frmstat  VARCHAR2(15);  -- Form Status
+  curblk   VARCHAR2(30);  -- Current Block
+  currel   VARCHAR2(30);  -- Current Relation
+  curdtl   VARCHAR2(30);  -- Current Detail Block
 
-   Purpose        :  To insert a record in inv_hdr and inv_dtl .   
-                  
-   Calls          :  Null
-                   
-   Returns        :  Null
-
-   Steps Involved :  
-                     
-   History        :
-   Author          Date               What
-   ------          ----               ----
-   Gagan           25/11/2003         1.0
-   Rohit           02/01/2004         TBR VI Rel-3 IT-1. Issue No: 22
-   Rohit           07/07/2004         TBR VI ODC. Issue No: 151.
-                                      Remove nowait as it is conflicting with sp_sin60000 batch.
-*/
-
-
-PROCEDURE FP_INV_REISSUE_INV IS
-BEGIN
-DECLARE
-   l_d_sysdate    DATE;
-   l_v_inv_no     VARCHAR2(10);
-   l_n_cnt        NUMBER;
-   l_n_new_inv_no INV_INV_CTRL.IC_VALUE%TYPE;
-   l_v_reason_cd  INV_DOC_HDR.IH_RSN_CD%TYPE;
-   l_v_temp       VARCHAR2(1);
-   l_excep_lock    EXCEPTION;   
-   PRAGMA EXCEPTION_INIT (l_excep_lock,-54);   /*to handle if row is locked*/
-   l_v_ret_typ     VARCHAR2(1);
-   --Start added by Nattanan 15/05/2015
-   l_v_err_msg                  VARCHAR2(4000);
-   L_N_ERR_CD										NUMBER;
-   --End added by Nattanan 15/05/2015
-BEGIN
-   /***************TBR VI Rel-4 Onsite IT-1: 22 . Rohit Commented Code Starts***************/
--- Assigning the due date to d/b field
---   :B02_INV_DOC_HDR.IH_DUE_DT := :B02_INV_DOC_HDR.NBT_IH_DUE_DT;
-   /***************TBR VI Rel-4 Onsite IT-1: 22 . Rohit Commented Code Ends***************/
-
-   SELECT SYSDATE INTO l_d_sysdate 
-   FROM DUAL;
-
-   -- Select max + 1 from ctrl table, if record doesnot exist then insert the record else update
-
-   SELECT TO_CHAR(l_d_sysdate,'YYYY')||LPAD(NVL(MAX(IC_VALUE),'0') + 1,6,'0'), COUNT(*),
-   TO_NUMBER(NVL(MAX(IC_VALUE),0) + 1)
-   INTO l_v_inv_no, l_n_cnt, l_n_new_inv_no   
-   FROM INV_INV_CTRL
-   WHERE IC_YEAR = TO_NUMBER(TO_CHAR(l_d_sysdate,'YYYY')) 
-   AND   IC_TY = 'I';
-
-   IF l_n_cnt = 0 THEN 
-      INSERT INTO INV_INV_CTRL
-      (
-       IC_YEAR, 
-       IC_TY, 
-       IC_VALUE
-      )
-      VALUES
-     (
-      TO_CHAR(l_d_sysdate,'YYYY'),
-      'I',
-      l_n_new_inv_no
-      );
-   ELSIF l_n_cnt > 0 THEN 
-   BEGIN
-     SELECT TO_CHAR(l_d_sysdate,'YYYY')||LPAD((IC_VALUE+1), 6, '0'), 
-            IC_VALUE + 1
-     INTO   l_v_inv_no,         -- Fetching Invoice Value again - changed on 09/07/2004
-            l_n_new_inv_no      -- Fetching Invoice Value again - changed on 09/07/2004
-     FROM   INV_INV_CTRL
-     WHERE  IC_YEAR = TO_NUMBER(TO_CHAR(l_d_sysdate,'YYYY')) 
-     AND    IC_TY = 'I' 
-     FOR UPDATE ;
-     /***************TBR VI ODC. Issue No: 151.remove nowait as it is conflicting with sp_sin60000 batch.
-                      Rohit commented code starts***************/
---   NOWAIT;
-     /***************TBR VI ODC. Issue No: 151.remove nowait as it is conflicting with sp_sin60000 batch.
-                      Rohit commented code ends***************/
-
-     UPDATE INV_INV_CTRL
-     SET IC_VALUE = l_n_new_inv_no
-     WHERE IC_YEAR = TO_NUMBER(TO_CHAR(l_d_sysdate,'YYYY')) 
-     AND   IC_TY = 'I';
-   EXCEPTION
-      WHEN l_excep_lock THEN
-         LP_TBR013_PRCDR_ERR_HNDLR ('TBR', '01075', l_v_ret_typ);
-      WHEN OTHERS THEN
-         LP_TBR014_OTH_EXCPTNS;
-   END;   
-   END IF;
-  
-
-BEGIN
-   INSERT INTO INV_DOC_HDR
-   (
-    IH_DOC_DT, 
-    IH_DOC_NO, 
-    IH_DOC_TY, 
-    IH_SLSM_CD, 
-    IH_CUST_CD, 
-    IH_EMP_CD, 
-    IH_CUST_NM_ENG, 
-    IH_CUST_NM_TH, 
-    IH_ADR_ADR, 
-    IH_ADR_ROAD, 
-    IH_ADR_DISTT, 
-    IH_ADR_PRV, 
-    IH_ADR_ZIP, 
-    IH_CRE_BY, 
-    IH_CRE_DT, 
-    IH_UPD_BY, 
-    IH_UPD_DT, 
-    IH_PMT_CD, 
-    IH_PMT_PERIOD, 
-    IH_PMT_PERIOD_FLG, 
-    IH_PMT_INT, 
-    IH_PMT_INT_VEH_AMT, 
-    IH_PMT_INT_OPT_AMT, 
-    IH_TERM_YRS, 
-    IH_PROJECT_NO, 
-    IH_BUDGET_NO, 
-    IH_PREQN_NO, 
-    IH_COST_CENTER, 
-    IH_WS_VEH_UPRC, 
-    IH_WS_AIR_UPRC, 
-    IH_WS_OPT_UPRC, 
-    IH_TRD_DISC, 
-    IH_VEH_DOWN_PMT, 
-    IH_AIR_DOWN_PMT, 
-    IH_OPT_DOWN_PMT, 
-    IH_INV_VEH_UPRC, 
-    IH_INV_AIR_UPRC, 
-    IH_INV_OPT_UPRC, 
-    IH_VAT, 
-    IH_VAT_VEH_AMT, 
-    IH_VAT_AIR_AMT, 
-    IH_VAT_OPT_AMT, 
-    IH_1_DUE_DT, 
-    IH_1_DUE_AMT, 
-    IH_LAST_DUE_DT, 
-    IH_LAST_DUE_AMT, 
-    IH_DUE_DT, 
-    IH_UNITS, 
-    IH_PRINT_FLG, 
-    IH_PRINT_DT, 
-    IH_CANCEL_FLG, 
-    IH_CANCEL_DT, 
-    IH_SAP_FLG, 
-    IH_INV_VEH_AMT, 
-    IH_INV_AIR_AMT, 
-    IH_INV_OPT_AMT, 
-    IH_SRS_CD, 
-    IH_MOD_CD, 
-    IH_MOD_SFX, 
-    IH_CLR_TY, 
-    IH_SLS_CH, 
-    IH_SLS_TYP, 
-    IH_WO_VAT, 
-    IH_REF_INV_NO, 
-    IH_RSN_CD, 
-    IH_RSN_IND, 
-    IH_CR_VEH_BAL, 
-    IH_CR_OPT_BAL, 
-    IH_REMARKS, 
-    IH_VAT_CD, 
-    IH_INV_NEW_VEH_AMT, 
-    IH_INV_NEW_AIR_AMT, 
-    IH_INV_NEW_OPT_AMT, 
-    IH_DENSO_DOC_FLG, 
-    IH_DENSO_DOC_DT, 
-    IH_ICS_DOC_FLG, 
-    IH_ICS_DOC_DT, 
-    IH_ICS_CNL_FLG, 
-    IH_ICS_CNL_DT, 
-    IH_DLR_CD, 
-    IH_CNL_RSN, 
-    IH_ACT_CUST_NM, 
-    IH_ACT_CUST_ADR, 
-    IH_ACT_CUST_ROAD, 
-    IH_ACT_CUST_DISTT, 
-    IH_ACT_CUST_PRV, 
-    IH_ACT_CUST_ZIP, 
-    IH_TRD_OPT_DISC, 
-    IH_AC_CD, 
-    IH_SUB_GRP,
-    IH_TAX_ID, -- Added by Bindu on 20/11/2013 for VAR Regulation Changes
-    IH_BUS_PLC, -- Added by Bindu on 20/11/2013 for VAR Regulation Changes
-    --Start added by Nattanan 8/2/2016 CR - CNDN Phase1
-    IH_UPD_ADD_FLG
-    --End added by Nattanan 8/2/2016 CR - CNDN Phase1
-   )
-   VALUES
-   (
-    :B02_INV_DOC_HDR.IH_DOC_DT,
-    l_v_inv_no,
-    'I',
-    :B02_INV_DOC_HDR.IH_SLSM_CD,
-    :B02_INV_DOC_HDR.NBT_IH_CUST_CD,
-    :B02_INV_DOC_HDR.NBT_IH_EMP_CD,
-    :B02_INV_DOC_HDR.NBT_IH_CUST_NM_ENG,
-    :B02_INV_DOC_HDR.NBT_IH_CUST_NM_TH,
-    :B02_INV_DOC_HDR.NBT_IH_ADR_ADR,
-    :B02_INV_DOC_HDR.NBT_IH_ADR_ROAD,
-    :B02_INV_DOC_HDR.NBT_IH_ADR_DISTT,
-    :B02_INV_DOC_HDR.NBT_IH_ADR_PRV,
-    :B02_INV_DOC_HDR.NBT_IH_ADR_ZIP,
-    NVL(:GLOBAL.SM_ID, :B01_GLOBAL.NBT_US),
-    l_d_sysdate,
-    NULL,  -- Updated By 
-    NULL,  -- Updated Date
-    :B02_INV_DOC_HDR.NBT_IH_PMT_CD,
-    :B02_INV_DOC_HDR.NBT_IH_PMT_PERIOD,
-    :B02_INV_DOC_HDR.NBT_IH_PMT_PERIOD_FLG,
-    :B02_INV_DOC_HDR.IH_PMT_INT,
-    :B02_INV_DOC_HDR.IH_PMT_INT_VEH_AMT,
-    :B02_INV_DOC_HDR.IH_PMT_INT_OPT_AMT,
-    :B02_INV_DOC_HDR.NBT_IH_TERM_YRS,
-    :B02_INV_DOC_HDR.NBT_IH_PROJECT_NO,
-    :B02_INV_DOC_HDR.NBT_IH_BUDGET_NO,
-    :B02_INV_DOC_HDR.NBT_IH_PREQN_NO,
-    :B02_INV_DOC_HDR.NBT_IH_COST_CENTER,
-    :B02_INV_DOC_HDR.IH_WS_VEH_UPRC,
-    :B02_INV_DOC_HDR.IH_WS_AIR_UPRC,
-    :B02_INV_DOC_HDR.IH_WS_OPT_UPRC,
-    :B02_INV_DOC_HDR.IH_TRD_DISC,
-    :B02_INV_DOC_HDR.IH_VEH_DOWN_PMT,
-    :B02_INV_DOC_HDR.IH_AIR_DOWN_PMT,
-    :B02_INV_DOC_HDR.IH_OPT_DOWN_PMT,
-    :B02_INV_DOC_HDR.IH_INV_VEH_UPRC,
-    :B02_INV_DOC_HDR.IH_INV_AIR_UPRC,
-    :B02_INV_DOC_HDR.IH_INV_OPT_UPRC,
-    :B02_INV_DOC_HDR.IH_VAT,
-    :B02_INV_DOC_HDR.IH_VAT_VEH_AMT,
-    :B02_INV_DOC_HDR.IH_VAT_AIR_AMT,
-    :B02_INV_DOC_HDR.IH_VAT_OPT_AMT,
-    :B02_INV_DOC_HDR.IH_1_DUE_DT,
-    :B02_INV_DOC_HDR.IH_1_DUE_AMT,
-    :B02_INV_DOC_HDR.IH_LAST_DUE_DT,
-    :B02_INV_DOC_HDR.IH_LAST_DUE_AMT,
-   /***************TBR VI Rel-4 Onsite IT-1: 22 . Rohit Commented and Added Code Starts***************/
---    :B02_INV_DOC_HDR.IH_DUE_DT,
-    :B02_INV_DOC_HDR.NBT_IH_DUE_DT,
-   /***************TBR VI Rel-4 Onsite IT-1: 22 . Rohit Commented and Added Code Starts***************/
-    :B02_INV_DOC_HDR.IH_UNITS,
-   /***************TBR VI Rel-4 Onsite IT-1: 23. Rohit Commented and Added Code Ends***************/
---    :B02_INV_DOC_HDR.IH_PRINT_FLG,
---    :B02_INV_DOC_HDR.IH_PRINT_DT,
-    NULL, --Print Flag
-    NULL, --Pring Date
-   /***************TBR VI Rel-4 Onsite IT-1: 23. Rohit Commented and Added Code Ends***************/
-    NULL,  -- Cancel flag
-    NULL,  -- Cancel Date
-    :B02_INV_DOC_HDR.IH_SAP_FLG,
-    :B02_INV_DOC_HDR.IH_INV_VEH_AMT,
-    :B02_INV_DOC_HDR.IH_INV_AIR_AMT,
-    :B02_INV_DOC_HDR.IH_INV_OPT_AMT,
-    :B02_INV_DOC_HDR.IH_SRS_CD,
-    :B02_INV_DOC_HDR.IH_MOD_CD,
-    :B02_INV_DOC_HDR.IH_MOD_SFX,
-    NULL,  -- :B02_INV_DOC_HDR.IH_CLR_TY,
-    :B02_INV_DOC_HDR.NBT_IH_SLS_CH,
-    :B02_INV_DOC_HDR.IH_SLS_TYP,
-    :B02_INV_DOC_HDR.NBT_IH_WO_VAT,
-    :B02_INV_DOC_HDR.NBT_OLD_INV_NO, -- Ref inv no
-    NULL, -- :B02_INV_DOC_HDR.IH_RSN_CD,  Reason Cd
-    NULL, -- :B02_INV_DOC_HDR.IH_RSN_IND,
-    :B02_INV_DOC_HDR.IH_CR_VEH_BAL,
-    :B02_INV_DOC_HDR.IH_CR_OPT_BAL,
-    /*Commented by Nattanan 06/05/2015
-    :B02_INV_DOC_HDR.NBT_IH_REMARKS,*/
-    REPLACE(:B02_INV_DOC_HDR.NBT_IH_REMARKS, CHR(10), ' '), /*Added by Nattanan 06/05/2015*/
-    :B02_INV_DOC_HDR.IH_VAT_CD,
-    :B02_INV_DOC_HDR.IH_INV_NEW_VEH_AMT,
-    :B02_INV_DOC_HDR.IH_INV_NEW_AIR_AMT,
-    :B02_INV_DOC_HDR.IH_INV_NEW_OPT_AMT,
-    NULL, -- Denso interface flag
-    NULL, -- Denso interface date
-    NULL, -- ICS interface flag
-    NULL, -- ICS interface date
-    NULL, -- ICS cancel interface flag
-    NULL, -- ICS cancel interface date
-    :B02_INV_DOC_HDR.IH_DLR_CD,
-    :B02_INV_DOC_HDR.IH_CNL_RSN,
-    :B02_INV_DOC_HDR.IH_ACT_CUST_NM,
-    :B02_INV_DOC_HDR.IH_ACT_CUST_ADR,
-    :B02_INV_DOC_HDR.IH_ACT_CUST_ROAD,
-    :B02_INV_DOC_HDR.IH_ACT_CUST_DISTT,
-    :B02_INV_DOC_HDR.IH_ACT_CUST_PRV,
-    :B02_INV_DOC_HDR.IH_ACT_CUST_ZIP,
-    :B02_INV_DOC_HDR.IH_TRD_OPT_DISC,
-    :B02_INV_DOC_HDR.IH_AC_CD,
-    :B02_INV_DOC_HDR.NBT_IH_SUB_GRP,
-    :B02_INV_DOC_HDR.NBT_IH_TAX_ID, -- Added by Bindu on 20/11/2013 for VAR Regulation Changes
-    :B02_INV_DOC_HDR.NBT_IH_BUS_PLC, -- Added by Bindu on 20/11/2013 for VAR Regulation Changes
-    --Start added by Nattanan 8/2/2016 CR - CNDN Phase1
-    :B02_INV_DOC_HDR.NBT_UPD_CST_FLG
-    --End added by Nattanan 8/2/2016 CR - CNDN Phase1
-    );
-EXCEPTION
-   WHEN OTHERS THEN 
-      FORMS_DDL('ROLLBACK');
-      LP_TBR014_OTH_EXCPTNS;      
-END;
-----------------------------------------------------------------------------------------
-      BEGIN
-         INSERT INTO INV_DOC_COA
-         (
-         ID_DOC_NO, 
-         ID_DOC_TYP, 
-         ID_CRE_BY, 
-         ID_CRE_DT, 
-         ID_UPD_BY, 
-         ID_UPD_DT, 
-         ID_DOC_COA
-         )
-         VALUES
-         (l_v_inv_no,
-         'I',
-         NVL(:GLOBAL.SM_ID, :B01_GLOBAL.NBT_US),
-         l_d_sysdate,
-         NULL,    
-         NULL,   
-         :B02_INV_DOC_HDR.NBT_INV_DOC_COA 
-      );
-      EXCEPTION
-         WHEN OTHERS THEN 
-            FORMS_DDL('ROLLBACK');
-            LP_TBR014_OTH_EXCPTNS;      
-      END;
-
-----------------------------------------------------------------------------------------
-
--- call procedure to insert record in VSC_INV_INFO
-   FP_INV_INS_VSC_INV_INFO(l_v_inv_no, l_n_new_inv_no);
-   :B02_INV_DOC_HDR.NBT_NEW_INV_NO := l_v_inv_no;
-	 
-	 --Start added by Nattanan 25/02/2015 coding by Dey
-		/*Commented by Nattanan 16/05/2015
-		UPDATE INV_CROSS_CAMPAIGN_DTL 
-		SET 	 ICC_DOC_NO = :B02_INV_DOC_HDR.NBT_NEW_INV_NO,
-					 ICC_ALLOC_DT = l_d_sysdate,
-					 ICC_CRE_DT = l_d_sysdate,
-					 ICC_INV_FLG = 'N'
-		WHERE ICC_DOC_NO = :B02_INV_DOC_HDR.NBT_OLD_INV_NO;*/
-	 --End added by Nattanan 25/02/2015 coding by Dey
-	 
-	 --Start added by Nattanan 15/05/2015
-	 SP_SINV00001.sp_main(:B02_INV_DOC_HDR.NBT_NEW_INV_NO,'I',L_N_ERR_CD,l_v_err_msg);
-	
-			      IF l_v_err_msg IS NOT NULL THEN
-							  INSERT
-							  INTO
-							    TBR_ERR_LOG
-							    (
-							      EL_MOD_NM,
-							      EL_ERR_CD,
-							      EL_PROG_ID,
-							      EL_ERR_MSG,
-							      EL_CRE_BY,
-							      EL_CRE_DT
-							    )
-							    VALUES
-							    (
-							      'INV',
-							      L_N_ERR_CD,
-							      'FINV60060',
-							      l_v_err_msg,
-							      :B01_GLOBAL.NBT_US,
-							      :B01_GLOBAL.NBT_DT
-							    );
-			      END IF;
-	 --End added by Nattanan 15/05/2015
-	 
-EXCEPTION
-   WHEN OTHERS THEN 
-      LP_TBR014_OTH_EXCPTNS;
-END;
-EXCEPTION
-   WHEN FORM_TRIGGER_FAILURE THEN
-      RAISE FORM_TRIGGER_FAILURE;
-   WHEN OTHERS THEN 
-      LP_TBR014_OTH_EXCPTNS;
-END;
------
-PACKAGE FP_INV_VAR IS
-  l_cancel_flg     INV_DOC_HDR.IH_CANCEL_FLG%TYPE := NULL;
-  l_doc_no         INV_DOC_HDR.IH_DOC_NO%TYPE := NULL;
-  l_old_doc_no     INV_DOC_HDR.IH_DOC_NO%TYPE := NULL;
-  l_new_doc_no     INV_DOC_HDR.IH_DOC_NO%TYPE := NULL;
-/*
-  this flag is 'S'ucess by default and 'F'ail when error occurs while cancelling/re-issuing the invoice
-*/
-  l_ent_qry_flg    VARCHAR2(1) := 'S';  
-END;
-----
---Start added by Nattanan 8/2/2016 CR - CNDN Phase1
-PROCEDURE FP_POP_PAYMENT_TERM IS
-   l_rg_pay_type    RECORDGROUP;
-   l_n_status       NUMBER;
-   l_v_qry          VARCHAR2(2000);
-   l_v_ret_type     TBR_ERR_MST.EM_ERR_TYP%TYPE;
-   l_v_mod_nm       TBR_ERR_MST.EM_MOD_NM%TYPE;
-   l_v_err_cd       TBR_ERR_MST.EM_ERR_CD%TYPE;
-BEGIN
-	/*Check A.) Clear payment type list and create Recordgroup using DS_CODE_MST Table*/
-   CLEAR_LIST('B02_INV_DOC_HDR.NBT_IH_PMT_CD');
-
-   l_rg_pay_type := FIND_GROUP('pay_type_rg'); 
-   IF NOT Id_Null(l_rg_pay_type) THEN 
-      DELETE_GROUP(l_rg_pay_type); 
-   END IF; 
-
-   l_v_qry := 'SELECT  CDM_CD'||'||'||''''||' '||''''||'||'||'CDM_DESC CDM_CD, CDM_CD  FROM DS_CODE_MST WHERE CDM_CD_TYP = '||''''||'INV'||''''||'  AND (CDM_PMT_CUST_STAFF = '||''''||'Y'||''''||'  OR CDM_PMT_CUST_DS = '||''''||'Y'||''''||' )';
-   /***************TBR VI Rel-4 Offshore. Issue No: 9. Rohit Added Code Starts***************/
-   l_v_qry := l_v_qry||' ORDER BY 2';
-   /***************TBR VI Rel-4 Offshore. Issue No: 9. Rohit Added Code Ends***************/
-
-   l_rg_pay_type := CREATE_GROUP_FROM_QUERY ('pay_type_rg',l_v_qry);
-   l_n_status := POPULATE_GROUP('pay_type_rg');
-   -- Check if population has been successful
-   IF l_n_status <> 0 THEN
-       LP_TBR013_PRCDR_ERR_HNDLR('INV','20220',l_v_ret_type);
-   END IF;
-
-   /* Check B.) Populate Payment Type List using record Group created in step A.*/
-   IF l_n_status = 0 THEN
-      POPULATE_LIST('B02_INV_DOC_HDR.NBT_IH_PMT_CD',l_rg_pay_type);
-   END IF;  
-EXCEPTION
-   WHEN FORM_TRIGGER_FAILURE THEN 
-      RAISE FORM_TRIGGER_FAILURE;
-   WHEN OTHERS THEN
-      LP_TBR014_OTH_EXCPTNS;  
-END;
---End added by Nattanan 8/2/2016 CR - CNDN Phase1
------------
---Start added by Nattanan 8/2/2016 CR - CNDN Phase1
-PROCEDURE FP_ROLLBACK_INV_DATA IS
-l_al_id            ALERT; 
-l_n_al_button      NUMBER;
-l_v_ret_type      TBR_ERR_MST.EM_ERR_TYP%TYPE;
-BEGIN
---Rollback values from invoice table
-:B02_INV_DOC_HDR.NBT_IH_DLR_CD := :B02_INV_DOC_HDR.IH_DLR_CD;	  	  
-:B02_INV_DOC_HDR.NBT_IH_CUST_CD := :B02_INV_DOC_HDR.IH_CUST_CD;
-:B02_INV_DOC_HDR.NBT_IH_SLS_TYP := :B02_INV_DOC_HDR.IH_SLS_TYP;
-:B02_INV_DOC_HDR.NBT_IH_SUB_GRP := :B02_INV_DOC_HDR.IH_SUB_GRP;
-:B02_INV_DOC_HDR.NBT_IH_SLS_CH := :B02_INV_DOC_HDR.IH_SLS_CH;
-:B02_INV_DOC_HDR.NBT_IH_WO_VAT := :B02_INV_DOC_HDR.IH_WO_VAT; 		
-:B02_INV_DOC_HDR.NBT_IH_EMP_CD := :B02_INV_DOC_HDR.IH_EMP_CD;
-:B02_INV_DOC_HDR.NBT_IH_TAX_ID := :B02_INV_DOC_HDR.IH_TAX_ID; 
-:B02_INV_DOC_HDR.NBT_IH_BUS_PLC := :B02_INV_DOC_HDR.IH_BUS_PLC;
-:B02_INV_DOC_HDR.NBT_IH_CUST_NM_ENG := :B02_INV_DOC_HDR.IH_CUST_NM_ENG;
-:B02_INV_DOC_HDR.NBT_IH_CUST_NM_TH := :B02_INV_DOC_HDR.IH_CUST_NM_TH;
-:B02_INV_DOC_HDR.NBT_IH_ADR_ADR := :B02_INV_DOC_HDR.IH_ADR_ADR;
-:B02_INV_DOC_HDR.NBT_IH_ADR_ROAD := :B02_INV_DOC_HDR.IH_ADR_ROAD;
-:B02_INV_DOC_HDR.NBT_IH_ADR_DISTT := :B02_INV_DOC_HDR.IH_ADR_DISTT;
-:B02_INV_DOC_HDR.NBT_IH_ADR_PRV := :B02_INV_DOC_HDR.IH_ADR_PRV;
-:B02_INV_DOC_HDR.NBT_IH_ADR_ZIP := :B02_INV_DOC_HDR.IH_ADR_ZIP;		
-:B02_INV_DOC_HDR.NBT_IH_PMT_CD := :B02_INV_DOC_HDR.IH_PMT_CD;
-:B02_INV_DOC_HDR.NBT_IH_PROJECT_NO := :B02_INV_DOC_HDR.IH_PROJECT_NO;
-:B02_INV_DOC_HDR.NBT_IH_PREQN_NO := :B02_INV_DOC_HDR.IH_PREQN_NO;
-:B02_INV_DOC_HDR.NBT_IH_PMT_PERIOD_FLG := :B02_INV_DOC_HDR.IH_PMT_PERIOD_FLG; 		
-:B02_INV_DOC_HDR.NBT_IH_PMT_PERIOD := :B02_INV_DOC_HDR.IH_PMT_PERIOD;
-:B02_INV_DOC_HDR.NBT_IH_BUDGET_NO := :B02_INV_DOC_HDR.IH_BUDGET_NO;
-:B02_INV_DOC_HDR.NBT_IH_COST_CENTER := :B02_INV_DOC_HDR.IH_COST_CENTER;
-:B02_INV_DOC_HDR.NBT_IH_TERM_YRS := :B02_INV_DOC_HDR.IH_TERM_YRS;
-:B02_INV_DOC_HDR.NBT_INV_DOC_COA := :B02_INV_DOC_HDR.INV_DOC_COA;
---For display in the screen
-BEGIN
-SELECT DECODE(CM_SLS_TYP,'D','Domestic','E','Indirect Export'),
-       GM_GRP_TYP||' '||GM_GRP_DESC, 
-       CM_SAP_CD
-INTO   :B02_INV_DOC_HDR.NBT_SLS_TYP_DESC,
-       :B02_INV_DOC_HDR.NBT_IH_SLS_CH_DESC, 
-       :B02_INV_DOC_HDR.NBT_CM_SAP_CD
-FROM   INV_CUST_MST, INV_GRP_MST
-WHERE  CM_CD = :B02_INV_DOC_HDR.NBT_IH_CUST_CD
-AND    CM_SUB_GRP = INV_GRP_MST.GM_GRP_CD  
-AND    INV_CUST_MST.CM_SLS_CH = INV_GRP_MST.GM_GRP_TYP;
-EXCEPTION WHEN NO_DATA_FOUND THEN
-    LP_TBR013_PRCDR_ERR_HNDLR ('INV', '20240', l_v_ret_type);
-WHEN OTHERS THEN
-    LP_TBR014_OTH_EXCPTNS;
-END;
-
-END;
---End added by Nattanan 8/2/2016 CR - CNDN Phase1
----------------
-/*
-   Name           :  FP_SET_ITEM_BG_COLOR
-   Module         :  INV
-   Purpose        :  Change Background color of Text item as per sales channel
-
-   History        :
-   Author          Date               What
-   ---------       ----               ----
-   Amrinder      03/09/2019         ATLAS Kaizen changes
-*/
-PROCEDURE FP_SET_ITEM_BG_COLOR(p_i_v_mode IN VARCHAR2) IS /*Q-Execute Query, E-Enter Query*/
-   l_v_excp_cust_cnt   NUMBER :=0; --Added by Amrinder on 03/09/2019 for ATLAS Kaizen changes
-BEGIN
-   SELECT COUNT(1)
-   INTO l_v_excp_cust_cnt
-   FROM DDMS_CODE_MST
-   WHERE DCM_CD_TYP = 'ATLAS'
-   AND DCM_CD = :B02_INV_DOC_HDR.IH_CUST_CD;
-
-   IF NVL(:B02_INV_DOC_HDR.NBT_UPD_CST_FLG,'N') = 'Y' THEN
-      IF p_i_v_mode = 'Q' THEN
-         IF :B02_INV_DOC_HDR.IH_SLS_CH IN ('3','4') AND l_v_excp_cust_cnt = 0 THEN
-            SET_ITEM_INSTANCE_PROPERTY( 'B02_INV_DOC_HDR.NBT_INV_DOC_COA', CURRENT_RECORD,VISUAL_ATTRIBUTE,'CG$MANDATORY_ITEM');
-            SET_ITEM_INSTANCE_PROPERTY( 'B02_INV_DOC_HDR.NBT_IH_COST_CENTER', CURRENT_RECORD,VISUAL_ATTRIBUTE,'CG$MANDATORY_ITEM');
-         ELSE
-            SET_ITEM_INSTANCE_PROPERTY( 'B02_INV_DOC_HDR.NBT_INV_DOC_COA', CURRENT_RECORD,VISUAL_ATTRIBUTE,'WHITE_10');
-            SET_ITEM_INSTANCE_PROPERTY( 'B02_INV_DOC_HDR.NBT_IH_COST_CENTER', CURRENT_RECORD,VISUAL_ATTRIBUTE,'WHITE_10');
-         END IF;
-
-         IF :B02_INV_DOC_HDR.IH_SLS_CH = '5' THEN
-            SET_ITEM_INSTANCE_PROPERTY( 'B02_INV_DOC_HDR.NBT_IH_PROJECT_NO', CURRENT_RECORD,VISUAL_ATTRIBUTE,'CG$MANDATORY_ITEM');
-         ELSE
-            SET_ITEM_INSTANCE_PROPERTY( 'B02_INV_DOC_HDR.NBT_IH_PROJECT_NO', CURRENT_RECORD,VISUAL_ATTRIBUTE,'WHITE_10');
-         END IF;
-
-         IF :B02_INV_DOC_HDR.IH_SLS_CH NOT IN ('3','4','5') THEN
-            SET_ITEM_INSTANCE_PROPERTY( 'B02_INV_DOC_HDR.NBT_IH_PREQN_NO', CURRENT_RECORD,VISUAL_ATTRIBUTE,'CG$MANDATORY_ITEM');
-         ELSE
-            SET_ITEM_INSTANCE_PROPERTY( 'B02_INV_DOC_HDR.NBT_IH_PREQN_NO', CURRENT_RECORD,VISUAL_ATTRIBUTE,'WHITE_10');
-         END IF;
-      ELSIF p_i_v_mode = 'E' THEN
-         SET_ITEM_INSTANCE_PROPERTY( 'B02_INV_DOC_HDR.NBT_INV_DOC_COA', CURRENT_RECORD,VISUAL_ATTRIBUTE,'GRAY_10');
-         SET_ITEM_INSTANCE_PROPERTY( 'B02_INV_DOC_HDR.NBT_IH_COST_CENTER', CURRENT_RECORD,VISUAL_ATTRIBUTE,'GRAY_10');
-         SET_ITEM_INSTANCE_PROPERTY( 'B02_INV_DOC_HDR.NBT_IH_PROJECT_NO', CURRENT_RECORD,VISUAL_ATTRIBUTE,'WHITE_10');
-         SET_ITEM_INSTANCE_PROPERTY( 'B02_INV_DOC_HDR.NBT_IH_PREQN_NO', CURRENT_RECORD,VISUAL_ATTRIBUTE,'WHITE_10');
+  FUNCTION First_Changed_Block_Below(Master VARCHAR2)
+  RETURN VARCHAR2 IS
+    curblk VARCHAR2(30);  -- Current Block
+    currel VARCHAR2(30);  -- Current Relation
+    retblk VARCHAR2(30);  -- Return Block
+  BEGIN
+    --
+    -- Initialize Local Vars
+    --
+    curblk := Master;
+    currel := Get_Block_Property(curblk,  FIRST_MASTER_RELATION);
+    --
+    -- While there exists another relation for this block
+    --
+    WHILE currel IS NOT NULL LOOP
+      --
+      -- Get the name of the detail block
+      --
+      curblk := Get_Relation_Property(currel, DETAIL_NAME);
+      --
+      -- If this block has changes, return its name
+      --
+      IF ( Get_Block_Property(curblk, STATUS) IN('CHANGED','INSERT') ) THEN
+        RETURN curblk;
+      ELSE
+        --
+        -- No changes, recursively look for changed blocks below
+        --
+        retblk := First_Changed_Block_Below(curblk);
+        --
+        -- If some block below is changed, return its name
+        --
+        IF retblk IS NOT NULL THEN
+          RETURN retblk;
+        ELSE
+          --
+          -- Consider the next relation
+          --
+          currel := Get_Relation_Property(currel, NEXT_MASTER_RELATION);
+        END IF;
       END IF;
-   ELSIF NVL(:B02_INV_DOC_HDR.NBT_UPD_CST_FLG,'N') = 'N' THEN
-      SET_ITEM_INSTANCE_PROPERTY( 'B02_INV_DOC_HDR.NBT_INV_DOC_COA', CURRENT_RECORD,VISUAL_ATTRIBUTE,'GRAY_10');
-      SET_ITEM_INSTANCE_PROPERTY( 'B02_INV_DOC_HDR.NBT_IH_COST_CENTER', CURRENT_RECORD,VISUAL_ATTRIBUTE,'GRAY_10');
-      SET_ITEM_INSTANCE_PROPERTY( 'B02_INV_DOC_HDR.NBT_IH_PROJECT_NO', CURRENT_RECORD,VISUAL_ATTRIBUTE,'GRAY_10');
-      SET_ITEM_INSTANCE_PROPERTY( 'B02_INV_DOC_HDR.NBT_IH_PREQN_NO', CURRENT_RECORD,VISUAL_ATTRIBUTE,'GRAY_10');
-   END IF;
-END;
-----------------------
-/*
-   Name           :  FP_TBR_WHN_NEW_FRM_INSTNC
-   
-   Module         :  TBR
+    END LOOP;
 
-   Purpose        :  Do On Load Procesing
-                     
-   Calls          :  FP_INV_POPULATE_LISTS
-                   
-   Returns        :  Null
-
-   Steps Involved :  Check A.) Set Form Title.
-                     Check B.) Fetch and display Date and User on Top right corner of screen.    
-                     Check C.) Populate Reason Type using FP_INV_POPULATE_LISTS
- 
-
-   History        :
-   Author          Date               What
-   ------          ----               ----
-   Gagan           24/11/2003         1.0
-   Rohit           14/09/2004         TBR VI ODC. Issue no: 255.
-   Rohit           16/11/2004         TBR VI SNM. Issue no: 40
-   Rahul           04/09/2009         To send Cm Code instead of SAP code to call SP_SINV60015
-   Nama            14/07/2010         Show COA for the Invoice
-   Amrinder        01/11/2011         TBR Migration
-   Vishal					 24/05/2017					Changes for TNGA CR
-   																		1. Trim AND NVL added to Engine PRefix fields for removing leading and trailing space
-   																		2. Changed size of Engine prefix fields from 3 to 5
-   Mayank          25/07/2019         ATLAS Kaizen changes - a) Change label from COA to WBS
-                                                             b) Increase Cost Center field from 8 to 10
-                                                                1) IH_COST_CENTER     - property length change from 8 to 10
-                                                                2) NBT_IH_COST_CENTER - property length change from 8 to 10
-                                                                3) B02_INV_DOC_HDR -> Change IH_COST_CENTER length from 8 to 10 at Data block property
-                                     
-*/
-
-PROCEDURE FP_TBR_WHN_NEW_FRM_INSTNC IS
-
-   l_v_ret_typ      VARCHAR2(1);
-
-   /****************TBR VI ODC. Issue no: 255. Rohit changed code starts*****************/
--- l_v_version      TBR_PROG_DTLS.TPD_VERSION1%TYPE := '5.3';
--- l_v_version      TBR_PROG_DTLS.TPD_VERSION1%TYPE := '5.4';
--- l_v_version      TBR_PROG_DTLS.TPD_VERSION1%TYPE := '5.5'; --Incremented for SNM Issue no 40. Rohit changed code dt: 16/11/2004
-   /****************TBR VI ODC. Issue no: 255. Rohit changed code ends*****************/
--- l_v_version      TBR_PROG_DTLS.TPD_VERSION1%TYPE := '5.6'; -- Added by Rahul on 04-Sep-2009
--- l_v_version      TBR_PROG_DTLS.TPD_VERSION1%TYPE := '5.7'; -- Added by Nama  on 14-Jul-2010
-   l_v_version      TBR_PROG_DTLS.TPD_VERSION1%TYPE := '1.0'; -- Added by Amrinder on 01-Nov-2011
-
-   l_v_mod_nm       TBR_ERR_MST.EM_MOD_NM%TYPE;
-   l_v_err_cd       TBR_ERR_MST.EM_ERR_CD%TYPE;
-   l_v_prog_id      TBR_PROG_DTLS.TPD_PROG_ID%TYPE := GET_APPLICATION_PROPERTY(CURRENT_FORM_NAME);
+    --
+    -- No changed blocks were found
+    --
+    RETURN NULL;
+  END First_Changed_Block_Below;
 
 BEGIN
+  --
+  -- Init Local Vars
+  --
+  mastblk  := :System.Master_Block;
+  coordop  := :System.Coordination_Operation;
+  trigblk  := :System.Trigger_Block;
+  startitm := :System.Trigger_Item;
+  frmstat  := :System.Form_Status;
 
-  :GLOBAL.SM_ID := :GLOBAL.SM_ID;
-   IF :GLOBAL.G_C_ERR = 'T' THEN
-      EXIT_FORM;
-   END IF;
-
-   /*Check A.) Set Form Title*/
-   LP_TBR016_WINPROC_INV('INV',:GLOBAL.WIN_TYP,'Invoice Cancellation / Re-Issuing (FINV60060 Ver ' || l_v_version || ')'); 
-
-   /*Check B.) Fetch and display Date and User on Top right corner of screen*/
-   BEGIN
-      SELECT  SYSDATE, 
-              USER
-      INTO    :B01_GLOBAL.NBT_SYSDATE, 
-              :B01_GLOBAL.NBT_USER
-      FROM    SYS.DUAL;
-   EXCEPTION
-   
-      WHEN NO_DATA_FOUND THEN
-         LP_TBR013_PRCDR_ERR_HNDLR ('TBR'
-                                    ,'01071'
-                                    ,l_v_ret_typ
-                                   );
-   
-      WHEN TOO_MANY_ROWS THEN
-         LP_TBR013_PRCDR_ERR_HNDLR ('TBR'
-                                    ,'01072'
-                                    ,l_v_ret_typ
-                                   );
-      WHEN OTHERS THEN
-         LP_TBR014_OTH_EXCPTNS;
-   END;
-
-   BEGIN
-      :B01_GLOBAL.NBT_US := :B01_GLOBAL.NBT_USER;
-      :B01_GLOBAL.NBT_DT := :B01_GLOBAL.NBT_SYSDATE;
-   END;
-
-   --START - /****Commented by Amrinder on 01/11/2011 for TBR Migration****/
-   /*
-   DECLARE
-      l_v_mod_nm       TBR_ERR_MST.EM_MOD_NM%TYPE;
-      l_v_err_cd       TBR_ERR_MST.EM_ERR_CD%TYPE;
-      l_v_prog_id      TBR_PROG_DTLS.TPD_PROG_ID%TYPE := GET_APPLICATION_PROPERTY(CURRENT_FORM_NAME);
-      l_v_ret_typ      TBR_ERR_MST.EM_ERR_TYP%TYPE;
-   BEGIN
-      LP_DNS013_CHECK_VERSION (l_v_prog_id,
-                               l_v_version,
-                               l_v_mod_nm,
-                               l_v_err_cd  
-                              );
-                              
-      IF l_v_err_cd <> '00000' THEN
-         LP_TBR013_PRCDR_ERR_HNDLR (l_v_mod_nm, l_v_err_cd, l_v_ret_typ);
-         EXIT_FORM(NO_VALIDATE);
+  --
+  -- If the coordination operation is anything but CLEAR_RECORD or
+  -- SYNCHRONIZE_BLOCKS, then continue checking.
+  --
+  IF coordop NOT IN ('CLEAR_RECORD', 'SYNCHRONIZE_BLOCKS') THEN
+    --
+    -- If we're processing the driving master block...
+    --
+    IF mastblk = trigblk THEN
+      --
+      -- If something in the form is changed, find the
+      -- first changed block below the master
+      --
+      IF frmstat = 'CHANGED' THEN
+        curblk := First_Changed_Block_Below(mastblk);
+        --
+        -- If we find a changed block below, go there
+        -- and Ask to commit the changes.
+        --
+        IF curblk IS NOT NULL THEN
+          Go_Block(curblk);
+          Check_Package_Failure;
+          Clear_Block(ASK_COMMIT);
+          --
+          -- If user cancels commit dialog, raise error
+          --
+          IF NOT ( :System.Form_Status = 'QUERY'
+                   OR :System.Block_Status = 'NEW' ) THEN
+            RAISE Form_Trigger_Failure;
+          END IF;
+        END IF;
       END IF;
-   END;
-   */
-   
-   --Start added by Nattanan 8/2/2016 CR - CNDN Phase1
-   IF GET_ITEM_PROPERTY('B02_INV_DOC_HDR.NBT_REISSUE_INVOICE', ENABLED) = 'TRUE' THEN   
-   SET_ITEM_PROPERTY('B02_INV_DOC_HDR.NBT_REISSUE_INVOICE', ENABLED, PROPERTY_FALSE);
-   END IF;
-   --Start added by Nattanan 8/2/2016 CR - CNDN Phase1
-   
-   --END - /****Commented by Amrinder on 01/11/2011 for TBR Migration****/
-   SET_BLOCK_PROPERTY('B02_INV_DOC_HDR',INSERT_ALLOWED,PROPERTY_FALSE);
-   SET_BLOCK_PROPERTY('B02_INV_DOC_HDR',UPDATE_ALLOWED,PROPERTY_FALSE);
-   FP_INV_ENABLE_DISABLE;
-   FP_INV_VAR.l_ent_qry_flg := 'S';
-   DO_KEY('ENTER_QUERY');
-END;
----------------
-PROCEDURE Query_Master_Details(rel_id Relation,detail VARCHAR2) IS
-  oldmsg VARCHAR2(2);  -- Old Message Level Setting
-  reldef VARCHAR2(5);  -- Relation Deferred Setting
-BEGIN
+    END IF;
+  END IF;
+
   --
-  -- Initialize Local Variable(s)
+  -- Clear all the detail blocks for this master without
+  -- any further asking to commit.
   --
-  reldef := Get_Relation_Property(rel_id, DEFERRED_COORDINATION);
-  oldmsg := :System.Message_Level;
+  currel := Get_Block_Property(trigblk, FIRST_MASTER_RELATION);
+  WHILE currel IS NOT NULL LOOP
+    curdtl := Get_Relation_Property(currel, DETAIL_NAME);
+    IF Get_Block_Property(curdtl, STATUS) <> 'NEW'  THEN
+      Go_Block(curdtl);
+      Check_Package_Failure;
+      Clear_Block(NO_VALIDATE);
+      IF :System.Block_Status <> 'NEW' THEN
+        RAISE Form_Trigger_Failure;
+      END IF;
+    END IF;
+    currel := Get_Relation_Property(currel, NEXT_MASTER_RELATION);
+  END LOOP;
+
   --
-  -- If NOT Deferred, Goto detail and execute the query.
+  -- Put cursor back where it started
   --
-  IF reldef = 'FALSE' THEN
-    Go_Block(detail);
+  IF :System.Cursor_Item <> startitm THEN
+    Go_Item(startitm);
     Check_Package_Failure;
-    :System.Message_Level := '10';
-    Execute_Query;
-    :System.Message_Level := oldmsg;
-  ELSE
-    --
-    -- Relation is deferred, mark the detail block as un-coordinated
-    --
-    Set_Block_Property(detail, COORDINATION_STATUS, NON_COORDINATED);
   END IF;
 
 EXCEPTION
-    WHEN Form_Trigger_Failure THEN
-      :System.Message_Level := oldmsg;
-      RAISE;
-END Query_Master_Details;
+  WHEN Form_Trigger_Failure THEN
+    IF :System.Cursor_Item <> startitm THEN
+      Go_Item(startitm);
+    END IF;
+    RAISE;
+
+END Clear_All_Master_Details;
+---------------
+PACKAGE DirectPrint /* com.niit.tbr.common.print.DirectPrint */ IS
+
+  -- 
+  -- DO NOT EDIT THIS FILE - it is machine generated!
+  -- 
+  BEAN_NAME	ORA_JAVA.JOBJECT;	-- BEAN_NAME
+  DEBUG_MODE	ORA_JAVA.JOBJECT;	-- DEBUG_MODE
+  DELIVER_EVENT	ORA_JAVA.JOBJECT;	-- DELIVER_EVENT
+  FOCUS_EVENT	ORA_JAVA.JOBJECT;	-- FOCUS_EVENT
+  KEY_EVENT	ORA_JAVA.JOBJECT;	-- KEY_EVENT
+  DEFAULT_COLOR_0	ORA_JAVA.JOBJECT;	-- DEFAULT_COLOR
+  MNEMONIC_INDEX_NONE	NUMBER;	-- MNEMONIC_INDEX_NONE
+  MNEMONIC_CHAR_NONE	PLS_INTEGER;	-- MNEMONIC_CHAR_NONE
+  DEFAULT_BORDERPAINTER	ORA_JAVA.JOBJECT;	-- DEFAULT_BORDERPAINTER
+  DEFAULT_PAINTER	ORA_JAVA.JOBJECT;	-- DEFAULT_PAINTER
+  DEFAULT_COLOR_1	ORA_JAVA.JOBJECT;	-- DEFAULT_COLOR
+  DEFAULT_FONT	ORA_JAVA.JOBJECT;	-- DEFAULT_FONT
+  TOP_ALIGNMENT	NUMBER;	-- TOP_ALIGNMENT
+  CENTER_ALIGNMENT	NUMBER;	-- CENTER_ALIGNMENT
+  BOTTOM_ALIGNMENT	NUMBER;	-- BOTTOM_ALIGNMENT
+  LEFT_ALIGNMENT	NUMBER;	-- LEFT_ALIGNMENT
+  RIGHT_ALIGNMENT	NUMBER;	-- RIGHT_ALIGNMENT
+  WIDTH	NUMBER;	-- WIDTH
+  HEIGHT	NUMBER;	-- HEIGHT
+  PROPERTIES	NUMBER;	-- PROPERTIES
+  SOMEBITS	NUMBER;	-- SOMEBITS
+  FRAMEBITS	NUMBER;	-- FRAMEBITS
+  ALLBITS	NUMBER;	-- ALLBITS
+  ERROR	NUMBER;	-- ERROR
+  ABORT	NUMBER;	-- ABORT
+
+
+  -- Constructor for signature ()V
+  FUNCTION new RETURN ORA_JAVA.JOBJECT;
+
+  -- Method: setProperty (Loracle/forms/properties/ID;Ljava/lang/Object;)Z
+  FUNCTION setProperty(
+    obj   ORA_JAVA.JOBJECT,
+    a0    ORA_JAVA.JOBJECT,
+    a1    ORA_JAVA.JOBJECT) RETURN BOOLEAN;
+
+  -- Method: init (Loracle/forms/handler/IHandler;)V
+  PROCEDURE init(
+    obj   ORA_JAVA.JOBJECT,
+    a0    ORA_JAVA.JOBJECT);
+
+END;
+--------
+PACKAGE BODY DirectPrint IS
+
+  -- 
+  -- DO NOT EDIT THIS FILE - it is machine generated!
+  -- 
+
+  args   JNI.ARGLIST;
+
+  -- Constructor for signature ()V
+  FUNCTION new RETURN ORA_JAVA.JOBJECT IS
+  BEGIN
+    args := NULL;
+    RETURN (JNI.NEW_OBJECT('com/niit/tbr/common/print/DirectPrint', '()V', args));
+  END;
+
+  -- Method: setProperty (Loracle/forms/properties/ID;Ljava/lang/Object;)Z
+  FUNCTION setProperty(
+    obj   ORA_JAVA.JOBJECT,
+    a0    ORA_JAVA.JOBJECT,
+    a1    ORA_JAVA.JOBJECT) RETURN BOOLEAN IS
+  BEGIN
+    args := JNI.CREATE_ARG_LIST(2);
+    JNI.ADD_OBJECT_ARG(args, a0, 'oracle/forms/properties/ID');
+    JNI.ADD_OBJECT_ARG(args, a1, 'java/lang/Object');
+    RETURN JNI.CALL_BOOLEAN_METHOD(FALSE, obj, 'com/niit/tbr/common/print/DirectPrint', 'setProperty', '(Loracle/forms/properties/ID;Ljava/lang/Object;)Z', args); 
+  END;
+
+  -- Method: init (Loracle/forms/handler/IHandler;)V
+  PROCEDURE init(
+    obj   ORA_JAVA.JOBJECT,
+    a0    ORA_JAVA.JOBJECT) IS
+  BEGIN
+    args := JNI.CREATE_ARG_LIST(1);
+    JNI.ADD_OBJECT_ARG(args, a0, 'oracle/forms/handler/IHandler');
+    JNI.CALL_VOID_METHOD(FALSE, obj, 'com/niit/tbr/common/print/DirectPrint', 'init', '(Loracle/forms/handler/IHandler;)V', args); 
+  END;
+
+
+BEGIN
+  -- BEAN_NAME (Loracle/forms/properties/ID;)
+  BEAN_NAME := JNI.GET_OBJECT_FIELD(TRUE, NULL, 'com/niit/tbr/common/print/DirectPrint', 'BEAN_NAME', 'Loracle/forms/properties/ID;');
+  BEAN_NAME := ORA_JAVA.NEW_GLOBAL_REF(BEAN_NAME);
+
+  -- DEBUG_MODE (Loracle/forms/properties/ID;)
+  DEBUG_MODE := JNI.GET_OBJECT_FIELD(TRUE, NULL, 'com/niit/tbr/common/print/DirectPrint', 'DEBUG_MODE', 'Loracle/forms/properties/ID;');
+  DEBUG_MODE := ORA_JAVA.NEW_GLOBAL_REF(DEBUG_MODE);
+
+  -- DELIVER_EVENT (Loracle/forms/properties/ID;)
+  DELIVER_EVENT := JNI.GET_OBJECT_FIELD(TRUE, NULL, 'com/niit/tbr/common/print/DirectPrint', 'DELIVER_EVENT', 'Loracle/forms/properties/ID;');
+  DELIVER_EVENT := ORA_JAVA.NEW_GLOBAL_REF(DELIVER_EVENT);
+
+  -- FOCUS_EVENT (Loracle/forms/properties/ID;)
+  FOCUS_EVENT := JNI.GET_OBJECT_FIELD(TRUE, NULL, 'com/niit/tbr/common/print/DirectPrint', 'FOCUS_EVENT', 'Loracle/forms/properties/ID;');
+  FOCUS_EVENT := ORA_JAVA.NEW_GLOBAL_REF(FOCUS_EVENT);
+
+  -- KEY_EVENT (Loracle/forms/properties/ID;)
+  KEY_EVENT := JNI.GET_OBJECT_FIELD(TRUE, NULL, 'com/niit/tbr/common/print/DirectPrint', 'KEY_EVENT', 'Loracle/forms/properties/ID;');
+  KEY_EVENT := ORA_JAVA.NEW_GLOBAL_REF(KEY_EVENT);
+
+  -- DEFAULT_COLOR (Ljava/awt/Color;)
+  DEFAULT_COLOR_0 := JNI.GET_OBJECT_FIELD(TRUE, NULL, 'com/niit/tbr/common/print/DirectPrint', 'DEFAULT_COLOR', 'Ljava/awt/Color;');
+  DEFAULT_COLOR_0 := ORA_JAVA.NEW_GLOBAL_REF(DEFAULT_COLOR_0);
+
+  -- MNEMONIC_INDEX_NONE (I)
+  MNEMONIC_INDEX_NONE := JNI.GET_INT_FIELD(TRUE, NULL, 'com/niit/tbr/common/print/DirectPrint', 'MNEMONIC_INDEX_NONE', 'I');
+
+  -- MNEMONIC_CHAR_NONE (C)
+  MNEMONIC_CHAR_NONE := JNI.GET_CHAR_FIELD(TRUE, NULL, 'com/niit/tbr/common/print/DirectPrint', 'MNEMONIC_CHAR_NONE', 'C');
+
+  -- DEFAULT_BORDERPAINTER (Loracle/ewt/painter/BorderPainter;)
+  DEFAULT_BORDERPAINTER := JNI.GET_OBJECT_FIELD(TRUE, NULL, 'com/niit/tbr/common/print/DirectPrint', 'DEFAULT_BORDERPAINTER', 'Loracle/ewt/painter/BorderPainter;');
+  DEFAULT_BORDERPAINTER := ORA_JAVA.NEW_GLOBAL_REF(DEFAULT_BORDERPAINTER);
+
+  -- DEFAULT_PAINTER (Loracle/ewt/painter/Painter;)
+  DEFAULT_PAINTER := JNI.GET_OBJECT_FIELD(TRUE, NULL, 'com/niit/tbr/common/print/DirectPrint', 'DEFAULT_PAINTER', 'Loracle/ewt/painter/Painter;');
+  DEFAULT_PAINTER := ORA_JAVA.NEW_GLOBAL_REF(DEFAULT_PAINTER);
+
+  -- DEFAULT_COLOR (Ljava/awt/Color;)
+  DEFAULT_COLOR_1 := JNI.GET_OBJECT_FIELD(TRUE, NULL, 'com/niit/tbr/common/print/DirectPrint', 'DEFAULT_COLOR', 'Ljava/awt/Color;');
+  DEFAULT_COLOR_1 := ORA_JAVA.NEW_GLOBAL_REF(DEFAULT_COLOR_1);
+
+  -- DEFAULT_FONT (Ljava/awt/Font;)
+  DEFAULT_FONT := JNI.GET_OBJECT_FIELD(TRUE, NULL, 'com/niit/tbr/common/print/DirectPrint', 'DEFAULT_FONT', 'Ljava/awt/Font;');
+  DEFAULT_FONT := ORA_JAVA.NEW_GLOBAL_REF(DEFAULT_FONT);
+
+  -- TOP_ALIGNMENT (F)
+  TOP_ALIGNMENT := JNI.GET_FLOAT_FIELD(TRUE, NULL, 'com/niit/tbr/common/print/DirectPrint', 'TOP_ALIGNMENT', 'F');
+
+  -- CENTER_ALIGNMENT (F)
+  CENTER_ALIGNMENT := JNI.GET_FLOAT_FIELD(TRUE, NULL, 'com/niit/tbr/common/print/DirectPrint', 'CENTER_ALIGNMENT', 'F');
+
+  -- BOTTOM_ALIGNMENT (F)
+  BOTTOM_ALIGNMENT := JNI.GET_FLOAT_FIELD(TRUE, NULL, 'com/niit/tbr/common/print/DirectPrint', 'BOTTOM_ALIGNMENT', 'F');
+
+  -- LEFT_ALIGNMENT (F)
+  LEFT_ALIGNMENT := JNI.GET_FLOAT_FIELD(TRUE, NULL, 'com/niit/tbr/common/print/DirectPrint', 'LEFT_ALIGNMENT', 'F');
+
+  -- RIGHT_ALIGNMENT (F)
+  RIGHT_ALIGNMENT := JNI.GET_FLOAT_FIELD(TRUE, NULL, 'com/niit/tbr/common/print/DirectPrint', 'RIGHT_ALIGNMENT', 'F');
+
+  -- WIDTH (I)
+  WIDTH := JNI.GET_INT_FIELD(TRUE, NULL, 'com/niit/tbr/common/print/DirectPrint', 'WIDTH', 'I');
+
+  -- HEIGHT (I)
+  HEIGHT := JNI.GET_INT_FIELD(TRUE, NULL, 'com/niit/tbr/common/print/DirectPrint', 'HEIGHT', 'I');
+
+  -- PROPERTIES (I)
+  PROPERTIES := JNI.GET_INT_FIELD(TRUE, NULL, 'com/niit/tbr/common/print/DirectPrint', 'PROPERTIES', 'I');
+
+  -- SOMEBITS (I)
+  SOMEBITS := JNI.GET_INT_FIELD(TRUE, NULL, 'com/niit/tbr/common/print/DirectPrint', 'SOMEBITS', 'I');
+
+  -- FRAMEBITS (I)
+  FRAMEBITS := JNI.GET_INT_FIELD(TRUE, NULL, 'com/niit/tbr/common/print/DirectPrint', 'FRAMEBITS', 'I');
+
+  -- ALLBITS (I)
+  ALLBITS := JNI.GET_INT_FIELD(TRUE, NULL, 'com/niit/tbr/common/print/DirectPrint', 'ALLBITS', 'I');
+
+  -- ERROR (I)
+  ERROR := JNI.GET_INT_FIELD(TRUE, NULL, 'com/niit/tbr/common/print/DirectPrint', 'ERROR', 'I');
+
+  -- ABORT (I)
+  ABORT := JNI.GET_INT_FIELD(TRUE, NULL, 'com/niit/tbr/common/print/DirectPrint', 'ABORT', 'I');
+
+END;
